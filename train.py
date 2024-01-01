@@ -6,6 +6,8 @@ from utils.loss import MHLoss_1
 import torch.nn.functional as F
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
+LOAD_CHECK_POINT = False
+checkpoint_path = ''
 model_choice = {
     'MHCRFBDMPAUnet3D':MHCRFBDMPAUnet3D
 }
@@ -163,6 +165,10 @@ loss_func = MHLoss_1(
             'class_4_foreground_guide_loss':0.75
     }
 )
+if LOAD_CHECK_POINT:
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optim.load_state_dict(checkpoint['optim_state_dict'])
 train(
     train_dataloader,
     model,
