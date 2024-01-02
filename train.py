@@ -1,17 +1,20 @@
 from torch.utils.data import DataLoader
 import torch
-from src.MHCRFBDMPAUnet3D import MHCRFBDMPAUnet3D as MHCRFBDMPAUnet3D
+from MHCRFBDMPUnet3D import MHCRFBDMPUnet3D as MHCRFBDMPUnet3D
+from AttentionMHCRFBDMPUnet3D import AMHCRFBDMPUnet3D as AMHCRFBDMPUnet3D
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1
 import torch.nn.functional as F
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
+from datetime import datetime
 LOAD_CHECK_POINT = False
 checkpoint_path = ''
 model_choice = {
-    'MHCRFBDMPAUnet3D':MHCRFBDMPAUnet3D
+    'MHCRFBDMPUnet3D':MHCRFBDMPUnet3D,
+    'AMHCRFBDMPUnet3D':AMHCRFBDMPUnet3D
 }
-
+model_string = ''
 csv_dir = ''
 root_dir = ''
 data_train = BRATS(
@@ -26,7 +29,7 @@ data_val = BRATS(
 )
 train_dataloader = DataLoader(data_train,1,True)
 val_dataloader = DataLoader(data_val,1,True)
-model = model_choice['MHCRFBDMPAUnet3D'](4,3)
+model = model_choice[model_string](4,3)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 def pad_batch1_to_compatible_size(batch):
@@ -176,5 +179,5 @@ train(
     optim,
     4,
     2,
-    'CHECKPOINT.pth'
+    'CHECKPOINT_' + model_string + datetime.now().strftime('%H-%M-%S_%d-%m-%Y') + '.pth'
 )
