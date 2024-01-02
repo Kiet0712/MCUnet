@@ -11,6 +11,7 @@ import torch
 from MHCRFBDMPUnet3D import MHCRFBDMPUnet3D as MHCRFBDMPUnet3D
 from AttentionMHCRFBDMPUnet3D import AMHCRFBDMPUnet3D as AMHCRFBDMPUnet3D
 from ClassBaseGuideAMHCRFBDMPUnet3D import CBGAMHCRFBDMPUnet3D as CBGAMHCRFBDMPUnet3D
+from GANCBGAMHCRFBDPUnet3D import GANCBGAMHCRFBDUnet3D as GANCBGAMHCRFBDPUnet3D
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1
 import torch.nn.functional as F
@@ -18,11 +19,13 @@ import numpy as np
 from scipy.spatial.distance import directed_hausdorff
 from datetime import datetime
 LOAD_CHECK_POINT = False
+GAN_TRAINING = False
 checkpoint_path = ''
 model_choice = {
     'MHCRFBDMPUnet3D':MHCRFBDMPUnet3D,
     'AMHCRFBDMPUnet3D':AMHCRFBDMPUnet3D,
-    'CBGAMHCRFBDMPUnet3D':CBGAMHCRFBDMPUnet3D
+    'CBGAMHCRFBDMPUnet3D':CBGAMHCRFBDMPUnet3D,
+    'GANCBGAMHCRFBDPUnet3D':GANCBGAMHCRFBDPUnet3D
 }
 model_string = ''
 csv_dir = ''
@@ -39,9 +42,12 @@ data_val = BRATS(
 )
 train_dataloader = DataLoader(data_train,1,True)
 val_dataloader = DataLoader(data_val,1,True)
-model = model_choice[model_string](4,3)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+if GAN_TRAINING:
+    model = model_choice[model_string](4,3,device)
+else:
+    model = model_choice[model_string](4,3)
+    model.to(device)
 def pad_batch1_to_compatible_size(batch):
     shape = batch.shape
     zyx = list(shape[-3:])
@@ -127,38 +133,6 @@ def validation(val_dataloader,model):
     mean_metrics_results = np.mean(result_metrics,axis=0)
     print('Validation result:')
     print_validation_result(mean_metrics_results[0],mean_metrics_results[1],mean_metrics_results[2])
-def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
-    for epoch in range(epochs):
-        running_loss = {}
-        for i,data in enumerate(train_dataloader):
-            inputs = data['img'].to(device)
-            label = data['label'].to(device)
-            optim.zero_grad()
-            outputs = model(inputs)
-            loss_cal = loss_func(outputs,inputs,label)
-            loss_cal['loss'].backward()
-            optim.step()
-            for key in loss_cal:
-                if i==0:
-                    running_loss[key]=loss_cal[key].item()
-                else:
-                    running_loss[key]+=loss_cal[key].item()
-            if i%100==0 and i!=0:
-                print('Epoch ' + str(epoch+1) + ', iter ' + str(i+1) + ':')
-                for key in running_loss:
-                    print(key + ' = ' + str(running_loss[key]/100))
-                    running_loss[key]=0
-        if epoch%save_each_epoch==0:
-            print('================================VALIDATION ' + str(epoch+1)+'================================')
-            validation(val_dataloader,model)
-            torch.save(
-                {
-                    'model_state_dict':model.state_dict(),
-                    'optim_state_dict':optim.state_dict()
-                },checkpoint_save_path
-            )
-optim = torch.optim.Adam(model.parameters(),lr=1e-4)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,0.95)
 loss_func = MHLoss_1(
     {
         'segment_volume_loss':5,
@@ -178,10 +152,53 @@ loss_func = MHLoss_1(
             'class_4_foreground_guide_loss':0.75
     }
 )
+if not GAN_TRAINING:
+    optim = torch.optim.Adam(model.parameters(),lr=1e-4)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,0.95)
 if LOAD_CHECK_POINT:
-    checkpoint = torch.load(checkpoint_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optim.load_state_dict(checkpoint['optim_state_dict'])
+    if not GAN_TRAINING:
+        checkpoint = torch.load(checkpoint_path)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optim.load_state_dict(checkpoint['optim_state_dict'])
+    else:
+        model.load_checkpoint(checkpoint_path)
+def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
+    for epoch in range(epochs):
+        if not GAN_TRAINING:
+            running_loss = {}
+            for i,data in enumerate(train_dataloader):
+                inputs = data['img'].to(device)
+                label = data['label'].to(device)
+                optim.zero_grad()
+                outputs = model(inputs)
+                loss_cal = loss_func(outputs,inputs,label)
+                loss_cal['loss'].backward()
+                optim.step()
+                for key in loss_cal:
+                    if i==0:
+                        running_loss[key]=loss_cal[key].item()
+                    else:
+                        running_loss[key]+=loss_cal[key].item()
+                if i%100==0 and i!=0:
+                    print('Epoch ' + str(epoch+1) + ', iter ' + str(i+1) + ':')
+                    for key in running_loss:
+                        print(key + ' = ' + str(running_loss[key]/100))
+                        running_loss[key]=0
+            if epoch%save_each_epoch==0:
+                print('================================VALIDATION ' + str(epoch+1)+'================================')
+                validation(val_dataloader,model)
+                torch.save(
+                    {
+                        'model_state_dict':model.state_dict(),
+                        'optim_state_dict':optim.state_dict()
+                    },checkpoint_save_path
+                 )
+        else:
+            model.one_epoch(train_dataloader,loss_func,epoch)
+            if epoch%save_each_epoch==0:
+                print('================================VALIDATION ' + str(epoch+1)+'================================')
+                validation(val_dataloader,model.G)
+                model.save_checkpoint(checkpoint_save_path)
 train(
     train_dataloader,
     model,
