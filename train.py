@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader
 import torch
 from MHCRFBDMPUnet3D import MHCRFBDMPUnet3D as MHCRFBDMPUnet3D
 from AttentionMHCRFBDMPUnet3D import AMHCRFBDMPUnet3D as AMHCRFBDMPUnet3D
+from ClassBaseGuideAMHCRFBDMPUnet3D import CBGAMHCRFBDMPUnet3D as CBGAMHCRFBDMPUnet3D
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1
 import torch.nn.functional as F
@@ -12,7 +13,8 @@ LOAD_CHECK_POINT = False
 checkpoint_path = ''
 model_choice = {
     'MHCRFBDMPUnet3D':MHCRFBDMPUnet3D,
-    'AMHCRFBDMPUnet3D':AMHCRFBDMPUnet3D
+    'AMHCRFBDMPUnet3D':AMHCRFBDMPUnet3D,
+    'CBGAMHCRFBDMPUnet3D':CBGAMHCRFBDMPUnet3D
 }
 model_string = ''
 csv_dir = ''
