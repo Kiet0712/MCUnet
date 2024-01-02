@@ -1,3 +1,11 @@
+import tarfile
+file = tarfile.open('/kaggle/input/brats-2021-task1/BraTS2021_Training_Data.tar')
+
+file.extractall('./brain_images')
+file.close()
+import sys
+path_code = ''
+sys.path.append(path_code)
 from torch.utils.data import DataLoader
 import torch
 from MHCRFBDMPUnet3D import MHCRFBDMPUnet3D as MHCRFBDMPUnet3D
