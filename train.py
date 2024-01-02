@@ -175,5 +175,6 @@ train(
     loss_func,
     optim,
     4,
+    2,
     'CHECKPOINT.pth'
 )
