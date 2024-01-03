@@ -18,6 +18,7 @@ import torch.nn.functional as F
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
 from datetime import datetime
+from tqdm.auto import tqdm
 LOAD_CHECK_POINT = False
 GAN_TRAINING = False
 checkpoint_path = ''
@@ -112,7 +113,7 @@ def print_validation_result(et, tc, wt, name_metrics=["HDis      ", "Sens      "
   print("WT:  ", *wt)  # Print WT row with values
 def validation(val_dataloader,model):
     result_metrics = []
-    for i,data in enumerate(val_dataloader):
+    for i,data in enumerate(tqdm(val_dataloader)):
         inputs = data['img']
         crop_idx = data['crop_indices']
         inputs,pad = pad_batch1_to_compatible_size(inputs)
@@ -166,7 +167,7 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
     for epoch in range(epochs):
         if not GAN_TRAINING:
             running_loss = {}
-            for i,data in enumerate(train_dataloader):
+            for i,data in enumerate(tqdm(train_dataloader)):
                 inputs = data['img'].to(device)
                 label = data['label'].to(device)
                 optim.zero_grad()

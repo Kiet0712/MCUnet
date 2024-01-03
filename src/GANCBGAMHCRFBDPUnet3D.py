@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-
+from tqdm.auto import tqdm
 class Attention_block(nn.Module):
     def __init__(self,F_g,F_l,F_int):
         super().__init__()
@@ -457,7 +457,7 @@ class GANCBGAMHCRFBDUnet3D(nn.Module):
         patchGAN_fake = torch.from_numpy(np.zeros((6,1,14,14,14),dtype=np.float32)).to(self.device)
         patchGAN_true = torch.from_numpy(np.ones((6,1,14,14,14),dtype=np.float32)).to(self.device)
         running_loss = {}
-        for i,data in enumerate(train_dataloader):
+        for i,data in enumerate(tqdm(train_dataloader)):
             inputs = data['img'].to(self.device)
             label = data['label'].to(self.device)
             self.optim_G.zero_grad()
