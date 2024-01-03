@@ -430,7 +430,7 @@ class DiscriminatorLoss(nn.Module):
         patchGAN_true_output = D(inputs_for_D)
         return F.mse_loss(patchGAN_true_output,patchGAN_true)+F.mse_loss(patchGAN_fake_output,patchGAN_fake)
 class GANCBGAMHCRFBDUnet3D(nn.Module):
-    def __init__(self,n_channels, n_classes,device):
+    def __init__(self,n_channels, n_classes,device,weigt_adversarial):
         super().__init__()
         self.G = CBGAMHCRFBDMPUnet3D(n_channels,n_classes).to(device)
         self.D = Discriminator(128,device).to(device)
@@ -438,6 +438,7 @@ class GANCBGAMHCRFBDUnet3D(nn.Module):
         self.optim_D = torch.optim.Adam(self.D.parameters(),2e-4,(0.5,0.999))
         self.device = device
         self.D_loss = DiscriminatorLoss()
+        self.weigt_adversarial = weigt_adversarial
     def save_checkpoint(self,path):
         torch.save(
             {
@@ -466,7 +467,7 @@ class GANCBGAMHCRFBDUnet3D(nn.Module):
             loss_dict = mh_loss(outputs,inputs,label)
             loss_G = F.mse_loss(patchGAN_fake_output,patchGAN_true)
             loss_dict['loss_G']=loss_G
-            loss_dict['loss'] = loss_dict['loss']+loss_G
+            loss_dict['loss'] = loss_dict['loss']+self.weigt_adversarial*loss_G
             loss_dict['loss'].backward()
             self.optim_G.step()
             patchGAN_fake_output = patchGAN_fake_output.detach()
