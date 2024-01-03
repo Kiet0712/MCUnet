@@ -432,7 +432,7 @@ class DiscriminatorLoss(nn.Module):
 class GANCBGAMHCRFBDUnet3D(nn.Module):
     def __init__(self,n_channels, n_classes,device):
         super().__init__()
-        self.G = GANCBGAMHCRFBDUnet3D(n_channels,n_classes).to(device)
+        self.G = CBGAMHCRFBDMPUnet3D(n_channels,n_classes).to(device)
         self.D = Discriminator(128,device).to(device)
         self.optim_G = torch.optim.Adam(self.G.parameters(),2e-4,(0.5,0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),2e-4,(0.5,0.999))
