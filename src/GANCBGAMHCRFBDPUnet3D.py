@@ -419,14 +419,14 @@ class DiscriminatorLoss(nn.Module):
     def __init__(self):
         super().__init__()
     def forward(self,D,inputs,label,patchGAN_fake_output,patchGAN_fake,patchGAN_true):
-        inputs_for_D = torch.cat([
-            inputs*(1-label[:,1:2,:,:,:]),
-            inputs*label[:,1:2,:,:,:],
-            inputs*(1-label[:,2:,:,:,:]),
-            inputs*label[:,2:,:,:,:],
-            inputs*(1-label[:,0:1,:,:,:]),
-            inputs*label[:,0:1,:,:,:],
-        ],dim=0)
+        inputs_for_D = {
+            'class_1_background':inputs*(1-label[:,1:2,:,:,:]),
+            'class_1_foreground':inputs*label[:,1:2,:,:,:],
+            'class_2_background':inputs*(1-label[:,2:,:,:,:]),
+            'class_2_foreground':inputs*label[:,2:,:,:,:],
+            'class_4_background':inputs*(1-label[:,0:1,:,:,:]),
+            'class_4_foreground':inputs*label[:,0:1,:,:,:],
+        }
         patchGAN_true_output = D(inputs_for_D)
         return F.mse_loss(patchGAN_true_output,patchGAN_true)+F.mse_loss(patchGAN_fake_output,patchGAN_fake)
 class GANCBGAMHCRFBDUnet3D(nn.Module):
