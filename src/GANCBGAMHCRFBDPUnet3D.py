@@ -462,9 +462,9 @@ class GANCBGAMHCRFBDUnet3D(nn.Module):
             label = data['label'].to(self.device)
             self.optim_G.zero_grad()
             outputs = self.G(inputs)
-            pathGAN_fake_output = self.D(outputs)
+            patchGAN_fake_output = self.D(outputs)
             loss_dict = mh_loss(outputs,inputs,label)
-            loss_G = F.mse_loss(pathGAN_fake_output,patchGAN_true)
+            loss_G = F.mse_loss(patchGAN_fake_output,patchGAN_true)
             loss_dict['loss_G']=loss_G
             loss_dict['loss'] = loss_dict['loss']+loss_G
             loss_dict['loss'].backward()
