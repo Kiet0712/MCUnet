@@ -45,8 +45,8 @@ data_val = BRATS(
     mode='val',
     root_dir=root_dir
 )
-train_dataloader = DataLoader(data_train,1,True)
-val_dataloader = DataLoader(data_val,1,True)
+train_dataloader = DataLoader(data_train,1,True,num_workers=4,pin_memory=False)
+val_dataloader = DataLoader(data_val,1,True,num_workers=4,pin_memory=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if GAN_TRAINING:
     model = model_choice[model_string](4,3,device)
@@ -191,7 +191,8 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         running_loss[key]=0
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
-                validation(val_dataloader,model)
+                with torch.no_grad():
+                    validation(val_dataloader,model)
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
@@ -202,7 +203,8 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             model.one_epoch(train_dataloader,loss_func,epoch)
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
-                validation(val_dataloader,model.G)
+                with torch.no_grad():
+                    validation(val_dataloader,model.G)
                 model.save_checkpoint(checkpoint_save_path)
 train(
     train_dataloader,

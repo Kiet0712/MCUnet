@@ -6,15 +6,15 @@ class Attention_block(nn.Module):
     def __init__(self,F_g,F_l,F_int):
         super().__init__()
         self.W_g = nn.Sequential(
-            nn.Conv3d(F_g,F_int,1),
+            nn.Conv3d(F_g,F_int,1,bias=False),
             nn.InstanceNorm3d(F_int)
         )
         self.W_x = nn.Sequential(
-            nn.Conv3d(F_l,F_int,1),
+            nn.Conv3d(F_l,F_int,1,bias=False),
             nn.InstanceNorm3d(F_int)
         )
         self.psi = nn.Sequential(
-            nn.Conv3d(F_int,1,1),
+            nn.Conv3d(F_int,1,1,bias=False),
             nn.InstanceNorm3d(1),
             nn.Sigmoid()
         )
@@ -31,10 +31,10 @@ class DoubleConv(nn.Module):
         if not mid_channels:
             mid_channels = out_channels
         self.double_conv = nn.Sequential(
-            nn.Conv3d(in_channels,mid_channels,3,1,1),
+            nn.Conv3d(in_channels,mid_channels,3,1,1,bias=False),
             nn.InstanceNorm3d(mid_channels),
             nn.ReLU(True),
-            nn.Conv3d(mid_channels,out_channels,3,1,1),
+            nn.Conv3d(mid_channels,out_channels,3,1,1,bias=False),
             nn.InstanceNorm3d(out_channels)
         )
         self.conv_skip_connection = nn.Sequential(
@@ -102,16 +102,16 @@ class MP1(nn.Module):
     def __init__(self,scale):
         super(MP1,self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(32*scale),2,2,0),
+            nn.Conv3d(int(64*scale),int(32*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True),
-            nn.Conv3d(int(32*scale),int(32*scale),2,2,0),
+            nn.Conv3d(int(32*scale),int(32*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True),
             nn.Conv3d(int(32*scale),int(128*scale),2,2,0),
         )
         self.conv2 = nn.Sequential(
-            nn.Conv3d(int(128*scale),int(64*scale),2,2,0),
+            nn.Conv3d(int(128*scale),int(64*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(64*scale)),
             nn.ReLU(inplace=True),
             nn.Conv3d(int(64*scale),int(128*scale),2,2,0)
@@ -128,7 +128,7 @@ class MP2(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(32*scale),2,2,0),
+            nn.Conv3d(int(64*scale),int(32*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True),
             nn.Conv3d(int(32*scale),int(64*scale),2,2,0)
@@ -149,7 +149,7 @@ class MP3(nn.Module):
         self.conv2 = nn.Conv3d(int(128*scale),int(32*scale),1,1,0)
         self.conv3 = nn.ConvTranspose3d(int(256*scale),int(32*scale),2,2,0)
         self.conv4 = nn.Sequential(
-            nn.ConvTranspose3d(int(512*scale),int(16*scale),2,2,0),
+            nn.ConvTranspose3d(int(512*scale),int(16*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(16*scale)),
             nn.ReLU(inplace=True),
             nn.ConvTranspose3d(int(16*scale),int(32*scale),2,2,0)
@@ -166,16 +166,16 @@ class MP4(nn.Module):
         self.conv1 = nn.Conv3d(int(64*scale),int(16*scale),1,1,0)
         self.conv2 = nn.ConvTranspose3d(int(128*scale),int(16*scale),2,2,0)
         self.conv3 = nn.Sequential(
-            nn.ConvTranspose3d(int(256*scale),int(8*scale),2,2,0),
+            nn.ConvTranspose3d(int(256*scale),int(8*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(8*scale)),
             nn.ReLU(inplace=True),
             nn.ConvTranspose3d(int(8*scale),int(16*scale),2,2,0)
         )
         self.conv4 = nn.Sequential(
-            nn.ConvTranspose3d(int(512*scale),int(8*scale),2,2,0),
+            nn.ConvTranspose3d(int(512*scale),int(8*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(8*scale)),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose3d(int(8*scale),int(8*scale),2,2,0),
+            nn.ConvTranspose3d(int(8*scale),int(8*scale),2,2,0,bias=False),
             nn.InstanceNorm3d(int(8*scale)),
             nn.ReLU(inplace=True),
             nn.ConvTranspose3d(int(8*scale),int(16*scale),2,2,0)
@@ -192,13 +192,13 @@ class CRFB(nn.Module):
         top_channels = int(top_channels)
         bottom_channels = int(bottom_channels)
         self.conv = nn.Sequential(
-            nn.Conv3d(top_channels,top_channels//4,1,1,0),
+            nn.Conv3d(top_channels,top_channels//4,1,1,0,bias=False),
             nn.InstanceNorm3d(top_channels//4),
             nn.ReLU(inplace=True),
             nn.Conv3d(top_channels//4,bottom_channels,2,2,0)
         )
         self.deconv = nn.Sequential(
-            nn.Conv3d(bottom_channels,bottom_channels//4,1,1,0),
+            nn.Conv3d(bottom_channels,bottom_channels//4,1,1,0,bias=False),
             nn.InstanceNorm3d(bottom_channels//4),
             nn.ReLU(inplace=True),
             nn.ConvTranspose3d(bottom_channels//4,top_channels,2,2,0)
@@ -209,82 +209,82 @@ class CRFBNetwork(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
         self.conv1_1 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(16*scale),3,1,1),
+            nn.Conv3d(int(64*scale),int(16*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(16*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv1_2 = nn.Sequential(
-            nn.Conv3d(int(16*scale),int(16*scale),3,1,1),
+            nn.Conv3d(int(16*scale),int(16*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(16*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv1_3 = nn.Sequential(
-            nn.Conv3d(int(16*scale),int(16*scale),3,1,1),
+            nn.Conv3d(int(16*scale),int(16*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(16*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv1_4 = nn.Sequential(
-            nn.Conv3d(int(16*scale),int(64*scale),3,1,1),
+            nn.Conv3d(int(16*scale),int(64*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(64*scale),
             nn.ReLU(inplace=True)
         )
         self.conv2_1 = nn.Sequential(
-            nn.Conv3d(int(128*scale),int(32*scale),3,1,1),
+            nn.Conv3d(int(128*scale),int(32*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv2_2 = nn.Sequential(
-            nn.Conv3d(int(32*scale),int(32*scale),3,1,1),
+            nn.Conv3d(int(32*scale),int(32*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv2_3 = nn.Sequential(
-            nn.Conv3d(int(32*scale),int(32*scale),3,1,1),
+            nn.Conv3d(int(32*scale),int(32*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(32*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv2_4 = nn.Sequential(
-            nn.Conv3d(int(32*scale),int(128*scale),3,1,1),
+            nn.Conv3d(int(32*scale),int(128*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(128*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv3_1 = nn.Sequential(
-            nn.Conv3d(int(256*scale),int(64*scale),3,1,1),
+            nn.Conv3d(int(256*scale),int(64*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(64*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv3_2 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(64*scale),3,1,1),
+            nn.Conv3d(int(64*scale),int(64*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(64*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv3_3 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(64*scale),3,1,1),
+            nn.Conv3d(int(64*scale),int(64*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(64*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv3_4 = nn.Sequential(
-            nn.Conv3d(int(64*scale),int(256*scale),3,1,1),
+            nn.Conv3d(int(64*scale),int(256*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(256*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv4_1 = nn.Sequential(
-            nn.Conv3d(int(512*scale),int(128*scale),3,1,1),
+            nn.Conv3d(int(512*scale),int(128*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(128*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv4_2 = nn.Sequential(
-            nn.Conv3d(int(128*scale),int(128*scale),3,1,1),
+            nn.Conv3d(int(128*scale),int(128*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(128*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv4_3 = nn.Sequential(
-            nn.Conv3d(int(128*scale),int(128*scale),3,1,1),
+            nn.Conv3d(int(128*scale),int(128*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(128*scale)),
             nn.ReLU(inplace=True)
         )
         self.conv4_4 = nn.Sequential(
-            nn.Conv3d(int(128*scale),int(512*scale),3,1,1),
+            nn.Conv3d(int(128*scale),int(512*scale),3,1,1,bias=False),
             nn.InstanceNorm3d(int(512*scale)),
             nn.ReLU(inplace=True)
         )
