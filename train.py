@@ -169,6 +169,7 @@ if LOAD_CHECK_POINT:
         model.load_checkpoint(checkpoint_path)
 def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
     for epoch in range(epochs):
+        torch.backends.cudnn.benchmark = True
         if not GAN_TRAINING:
             running_loss = {}
             for i,data in enumerate(tqdm(train_dataloader)):
@@ -191,8 +192,8 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         running_loss[key]=0
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
-                with torch.no_grad():
-                    validation(val_dataloader,model)
+                torch.backends.cudnn.benchmark = False
+                validation(val_dataloader,model)
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
@@ -203,8 +204,8 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             model.one_epoch(train_dataloader,loss_func,epoch)
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
-                with torch.no_grad():
-                    validation(val_dataloader,model.G)
+                torch.backends.cudnn.benchmark = False
+                validation(val_dataloader,model.G)
                 model.save_checkpoint(checkpoint_save_path)
 train(
     train_dataloader,
