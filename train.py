@@ -45,7 +45,7 @@ data_val = BRATS(
     mode='val',
     root_dir=root_dir
 )
-train_dataloader = DataLoader(data_train,1,True,num_workers=4,pin_memory=False)
+train_dataloader = DataLoader(data_train,1,True,num_workers=4,pin_memory=True)
 val_dataloader = DataLoader(data_val,1,True,num_workers=4,pin_memory=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if GAN_TRAINING:
