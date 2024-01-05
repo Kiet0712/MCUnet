@@ -11,7 +11,7 @@ import torch
 from MHCRFBDMPUnet3D import MHCRFBDMPUnet3D as MHCRFBDMPUnet3D
 from AttentionMHCRFBDMPUnet3D import AMHCRFBDMPUnet3D as AMHCRFBDMPUnet3D
 from ClassBaseGuideAMHCRFBDMPUnet3D import CBGAMHCRFBDMPUnet3D as CBGAMHCRFBDMPUnet3D
-from GANCBGAMHCRFBDPUnet3D import GANCBGAMHCRFBDUnet3D as GANCBGAMHCRFBDPUnet3D
+from GAN3D import GAN3D as GAN3D
 from RClassBaseGuideAMHCRFBDMPUnet3D import RCBGAMHCRFBDMPUnet3D as RCBGAMHCRFBDMPUnet3D
 from SRCBGAMHCARFBDMPUnet3D import SRCBGAMHCARFBDMPUnet3D as SRCBGAMHCARFBDMPUnet3D
 from SCBGAMHCRFBDMPUnet3D import SCBGAMHCRFBDMPUnet3D as SCBGAMHCRFBDMPUnet3D
@@ -29,7 +29,6 @@ model_choice = {
     'MHCRFBDMPUnet3D':MHCRFBDMPUnet3D,
     'AMHCRFBDMPUnet3D':AMHCRFBDMPUnet3D,
     'CBGAMHCRFBDMPUnet3D':CBGAMHCRFBDMPUnet3D,
-    'GANCBGAMHCRFBDPUnet3D':GANCBGAMHCRFBDPUnet3D,
     'RCBGAMHCRFBDMPUnet3D':RCBGAMHCRFBDMPUnet3D,
     'SCBGAMHCRFBDMPUnet3D':SCBGAMHCRFBDMPUnet3D,
     'SRCBGAMHCARFBDMPUnet3D':SRCBGAMHCARFBDMPUnet3D
@@ -51,7 +50,7 @@ train_dataloader = DataLoader(data_train,1,True,num_workers=4,pin_memory=True)
 val_dataloader = DataLoader(data_val,1,True,num_workers=4,pin_memory=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if GAN_TRAINING:
-    model = model_choice[model_string](4,3,device)
+    model = GAN3D(4,3,device,0.1,model_string)
 else:
     model = model_choice[model_string](4,3)
     model.to(device)
