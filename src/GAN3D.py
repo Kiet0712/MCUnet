@@ -84,7 +84,7 @@ class DiscriminatorLoss(nn.Module):
         patchGAN_true_output = D(inputs_for_D)
         return F.mse_loss(patchGAN_true_output,patchGAN_true)+F.mse_loss(patchGAN_fake_output,patchGAN_fake)
 class GAN3D(nn.Module):
-    def __init__(self,n_channels, n_classes,device,weigt_adversarial,model_choice_str):
+    def __init__(self,n_channels, n_classes,device,weigt_adversarial,model_choice_str,data_augmentation):
         super().__init__()
         self.G = model_choice[model_choice_str](n_channels,n_classes).to(device)
         self.D = Discriminator(128,device).to(device)
@@ -93,6 +93,7 @@ class GAN3D(nn.Module):
         self.device = device
         self.D_loss = DiscriminatorLoss()
         self.weigt_adversarial = weigt_adversarial
+        self.data_augmentation = data_augmentation
     def save_checkpoint(self,path):
         torch.save(
             {
@@ -114,6 +115,8 @@ class GAN3D(nn.Module):
         running_loss = {}
         for i,data in enumerate(tqdm(train_dataloader)):
             inputs = data['img'].to(self.device)
+            if self.data_augmentation!=None:
+                inputs = self.data_augmentation(inputs)
             label = data['label'].to(self.device)
             self.optim_G.zero_grad()
             outputs = self.G(inputs)

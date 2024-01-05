@@ -17,6 +17,7 @@ from SRCBGAMHCARFBDMPUnet3D import SRCBGAMHCARFBDMPUnet3D as SRCBGAMHCARFBDMPUne
 from SCBGAMHCRFBDMPUnet3D import SCBGAMHCRFBDMPUnet3D as SCBGAMHCRFBDMPUnet3D
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1
+from utils.DataAugmentationBlock import DataAugmenter
 import torch.nn.functional as F
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
@@ -24,6 +25,7 @@ from datetime import datetime
 from tqdm.auto import tqdm
 LOAD_CHECK_POINT = False
 GAN_TRAINING = False
+AUGMENTATION = False
 checkpoint_path = ''
 model_choice = {
     'MHCRFBDMPUnet3D':MHCRFBDMPUnet3D,
@@ -49,8 +51,11 @@ data_val = BRATS(
 train_dataloader = DataLoader(data_train,1,True,num_workers=4,pin_memory=True)
 val_dataloader = DataLoader(data_val,1,True,num_workers=4,pin_memory=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+data_augmentation = None
+if AUGMENTATION:
+    data_augmentation = DataAugmenter(p=0.8, noise_only=False, channel_shuffling=False, drop_channnel=True).to(device)
 if GAN_TRAINING:
-    model = GAN3D(4,3,device,0.1,model_string)
+    model = GAN3D(4,3,device,0.1,model_string,data_augmentation)
 else:
     model = model_choice[model_string](4,3)
     model.to(device)
@@ -175,6 +180,8 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             running_loss = {}
             for i,data in enumerate(tqdm(train_dataloader)):
                 inputs = data['img'].to(device)
+                if AUGMENTATION:
+                    inputs = data_augmentation(inputs)
                 label = data['label'].to(device)
                 optim.zero_grad()
                 outputs = model(inputs)
