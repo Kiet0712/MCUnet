@@ -216,3 +216,45 @@ train(
     2,
     'CHECKPOINT_' + model_string + datetime.now().strftime('%H-%M-%S_%d-%m-%Y') + '.pth'
 )
+import itk                                                                
+import itkwidgets
+from ipywidgets import interact, interactive, IntSlider, ToggleButtons
+import matplotlib.pyplot as plt
+def visualize(infor: list,mode: list):
+    if mode[0]=='visualize_input_and_label':
+        inputs = infor[0]
+        label = infor[1]
+        def visualize_input_and_label(layer):
+            fig, axs = plt.subplots(2, 4,figsize=(20,20))
+            #"ET", "TC", "WT"
+            #'flair','t1','t1ce','t2'
+            axs[0,0].imshow(inputs[0,:,:,layer],cmap='gray')
+            axs[0,0].set_title('flair '+ str(layer))
+            axs[0,1].imshow(inputs[1,:,:,layer],cmap='gray')
+            axs[0,1].set_title('t1 ' + str(layer))
+            axs[0,2].imshow(inputs[2,:,:,layer],cmap='gray')
+            axs[0,2].set_title('t1ce ' + str(layer))
+            axs[0,3].imshow(inputs[3,:,:,layer],cmap='gray')
+            axs[0,3].set_title('t2 ' + str(layer))
+            axs[1,0].imshow(label[0,:,:,layer],cmap='gray')
+            axs[1,0].set_title('ET ' + str(layer))
+            axs[1,1].imshow(label[1,:,:,layer],cmap='gray')
+            axs[1,1].set_title('TC ' + str(layer))
+            axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
+            axs[1,2].set_title('WT ' + str(layer))
+            mask_label = np.zeros_like(label[0,:,:,layer])
+            mask_label[label[2,:,:,layer]==1]=2
+            mask_label[label[1,:,:,layer]==1]=1
+            mask_label[label[0,:,:,layer]==1]=4
+            axs[1,3].imshow(mask_label)
+            axs[1,3].set_title('Mask label')
+        interact(visualize_input_and_label,layer=(0,inputs.shape[3]-1))
+    elif mode[0]=='visualize_input_label_output_model':
+        if mode[1]=='one_head':
+            pass
+        elif mode[1]=='multi_head':
+            pass
+        else:
+            pass
+    else:
+        pass
