@@ -225,7 +225,7 @@ def visualize(infor: list,mode: list):
         inputs = infor[0]
         label = infor[1]
         def visualize_input_and_label(layer):
-            fig, axs = plt.subplots(2, 4,figsize=(20,20))
+            fig, axs = plt.subplots(2, 4,figsize=(15,8))
             #"ET", "TC", "WT"
             #'flair','t1','t1ce','t2'
             axs[0,0].imshow(inputs[0,:,:,layer],cmap='gray')
@@ -242,10 +242,10 @@ def visualize(infor: list,mode: list):
             axs[1,1].set_title('TC ' + str(layer))
             axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
             axs[1,2].set_title('WT ' + str(layer))
-            mask_label = np.zeros_like(label[0,:,:,layer])
-            mask_label[label[2,:,:,layer]==1]=2
-            mask_label[label[1,:,:,layer]==1]=1
-            mask_label[label[0,:,:,layer]==1]=4
+            mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
+            mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
+            mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
+            mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
             axs[1,3].imshow(mask_label)
             axs[1,3].set_title('Mask label')
         interact(visualize_input_and_label,layer=(0,inputs.shape[3]-1))
