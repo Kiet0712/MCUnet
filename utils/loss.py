@@ -36,13 +36,6 @@ class DiceLoss(nn.Module):
         dice_loss = 1 - dice_score.sum()/size
 
         return dice_loss
-class LogCoshDiceLoss(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.dice = DiceLoss()
-    def forward(self,pred,target):
-        loss = self.dice(pred,target)
-        return torch.math.log((torch.exp(loss)+torch.exp(-loss))/2)
 # BCE + Dice  loss
 class BceDiceLoss(nn.Module):
     def __init__(self):
@@ -56,20 +49,7 @@ class BceDiceLoss(nn.Module):
 
         loss = diceloss + bceloss
 
-        return loss
-class BceLogCoshDiceLoss(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.bce = BCELoss()
-        self.logcoshdice = LogCoshDiceLoss()
-
-    def forward(self, pred, target):
-        bceloss = self.bce(pred,target)
-        logcoshdice = self.logcoshdice(pred,target)
-
-        loss = logcoshdice + bceloss
-
-        return loss    
+        return loss  
 class MHLoss_1(nn.Module):
     def __init__(self,lamda_list):
         super().__init__()
@@ -139,11 +119,20 @@ class MHLoss_1(nn.Module):
             'class_4_background_guide_loss':class_4_background_guide_loss,
             'class_4_foreground_guide_loss':class_4_foreground_guide_loss
         }
+class CBDICECELOSS(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.class_4_DICECE = BceDiceLoss()
+        self.class_1_DICECE = BceDiceLoss()
+        self.class_2_DICECE = BceDiceLoss()
+    def forward(self,pred,target):
+        loss = self.class_4_DICECE(pred[:,0,:,:,:],target[:,0,:,:,:])+self.class_1_DICECE(pred[:,1,:,:,:],target[:,1,:,:,:])+self.class_2_DICECE(pred[:,2,:,:,:],target[:,2,:,:,:])
+        return loss/3
 class MHLoss_2(nn.Module):
     def __init__(self,lamda_list):
         super().__init__()
         self.lamda_list = lamda_list
-        self.bcelogcoshdice = BceLogCoshDiceLoss()
+        self.class_base_diceCE_loss = CBDICECELOSS()
     def forward(self,data,volume,gt_volume):
         segment_volume = data['segment_volume']
         reconstruct_volume = data['reconstruct_volume']
@@ -156,7 +145,7 @@ class MHLoss_2(nn.Module):
 
 
         #calculate_main_loss
-        segment_volume_loss = self.bcelogcoshdice(segment_volume,gt_volume)
+        segment_volume_loss = self.class_base_diceCE_loss(segment_volume,gt_volume)
         reconstruct_volume_loss = F.l1_loss(reconstruct_volume,volume)
         class_1_foreground_loss = F.l1_loss(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])
         class_2_foreground_loss = F.l1_loss(class_2_foreground,volume*gt_volume[:,2:,:,:,:])
