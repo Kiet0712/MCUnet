@@ -70,7 +70,7 @@ class OutConv(nn.Module):
             nn.Sigmoid()
         )
         self.mask_head = nn.Sequential(
-            nn.Conv3d(in_channels,out_channels*n_channels*2,kernel_size=1),
+            nn.Conv3d(in_channels+n_channels,out_channels*n_channels*2,kernel_size=1),
             nn.Sigmoid()
         )
         self.class_segment_conv = nn.Sequential(
