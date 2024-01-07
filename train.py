@@ -25,6 +25,7 @@ import numpy as np
 from scipy.spatial.distance import directed_hausdorff
 from datetime import datetime
 from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
 LOAD_CHECK_POINT = False
 GAN_TRAINING = False
 AUGMENTATION = False
@@ -102,29 +103,46 @@ def calculate_metrics(predict,gt):
             dice
         ])
     return results
-def print_validation_result(et, tc, wt, name_metrics=["HDis      ", "Sens      ", "Spec      ", "Dice"]):
-  """
-  Prints the Validation result with corresponding name metrics for three numpy arrays.
 
-  Args:
+PLOT= {
+    'et':[],
+    'tc':[],
+    'wt':[]
+}
+def print_validation_result(et, tc, wt, name_metrics=["HDis      ", "Sens      ", "Spec      ", "Dice"]):
+    """
+    Prints the Validation result with corresponding name metrics for three numpy arrays.
+
+    Args:
     et: A numpy array containing the first row of data.
     tc: A numpy array containing the second row of data.
     wt: A numpy array containing the third row of data.
     name_metrics: A list of strings containing the corresponding name metrics for each column.
 
-  Returns:
+    Returns:
     None
-  """
-  # Check if the number of columns and name metrics match
-  if len(et) != len(tc) != len(wt) != len(name_metrics):
-    raise ValueError("The number of columns and name metrics must be equal.")
+    """
+    # Check if the number of columns and name metrics match
+    if len(et) != len(tc) != len(wt) != len(name_metrics):
+        raise ValueError("The number of columns and name metrics must be equal.")
 
-  # Print the Validation result with row names
-  print("Validation result:")
-  print("     ", *name_metrics)  # Print header with metrics names
-  print("ET:  ", *et)  # Print ET row with values
-  print("TC:  ", *tc)  # Print TC row with values
-  print("WT:  ", *wt)  # Print WT row with values
+    # Print the Validation result with row names
+    print("Validation result:")
+    print("     ", *name_metrics)  # Print header with metrics names
+    print("ET:  ", *et)  # Print ET row with values
+    print("TC:  ", *tc)  # Print TC row with values
+    print("WT:  ", *wt)  # Print WT row with values
+    PLOT['et'].append(et[3])
+    PLOT['tc'].append(tc[3])
+    PLOT['wt'].append(wt[3])
+    plt.plot(PLOT['et'], linestyle='-', marker='o', color='r', label='ET') 
+    plt.plot(PLOT['tc'], linestyle='-', marker='o', color='g', label='TC') 
+    plt.plot(PLOT['wt'], linestyle='-', marker='o', color='b', label='WT') 
+    plt.title('Dice score')
+    plt.xlabel('Epoch')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 def validation(val_dataloader,model):
     result_metrics = []
     for i,data in enumerate(tqdm(val_dataloader)):
