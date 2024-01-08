@@ -45,8 +45,8 @@ class DataAugmenter(nn.Module):
                 self.transpose = sample(range(2, x.dim()), 2)
                 self.flip = randint(2, x.dim() - 1)
                 self.toggle = not self.toggle
-                new_x = x.transpose(*self.transpose).flip(self.flip)
-                new_y = y.transpose(*self.transpose).flip(self.flip)
+                new_x = x.transpose(*self.transpose).flip(self.flip).contiguous()
+                new_y = y.transpose(*self.transpose).flip(self.flip).contiguous()
                 return new_x,new_y
             else:
                 return x,y
