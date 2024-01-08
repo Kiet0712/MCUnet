@@ -124,6 +124,8 @@ class GAN3D(nn.Module):
             label = data['label'].to(self.device)
             self.optim_G.zero_grad()
             outputs = self.G(inputs)
+            if self.data_augmentation!=None:
+                outputs = self.data_augmentation.reverse(outputs)
             patchGAN_fake_output = self.D(outputs)
             loss_dict = mh_loss(outputs,inputs,label)
             loss_G = F.mse_loss(patchGAN_fake_output,patchGAN_true)

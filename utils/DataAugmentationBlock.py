@@ -53,12 +53,8 @@ class DataAugmenter(nn.Module):
     def reverse(self, x):
         if self.toggle:
             self.toggle = not self.toggle
-            if isinstance(x, list):  # case of deep supervision
-                seg, deeps = x
-                reversed_seg = seg.flip(self.flip).transpose(*self.transpose)
-                reversed_deep = [deep.flip(self.flip).transpose(*self.transpose) for deep in deeps]
-                return reversed_seg, reversed_deep
-            else:
-                return x.flip(self.flip).transpose(*self.transpose)
+            for key in x:
+                x[key]=x[key].flip(self.flip).transpose(*self.transpose)
+            return x
         else:
             return x
