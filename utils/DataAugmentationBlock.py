@@ -54,7 +54,7 @@ class DataAugmenter(nn.Module):
         if self.toggle:
             self.toggle = not self.toggle
             for key in x:
-                x[key]=x[key].flip(self.flip).transpose(*self.transpose)
+                x[key]=x[key].flip(self.flip).transpose(*self.transpose).contiguous()
             return x
         else:
             return x
