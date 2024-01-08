@@ -202,13 +202,11 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             running_loss = {}
             for i,data in enumerate(tqdm(train_dataloader)):
                 inputs = data['img'].to(device)
-                if AUGMENTATION:
-                    inputs = data_augmentation(inputs)
                 label = data['label'].to(device)
+                if AUGMENTATION:
+                    inputs,label = data_augmentation(inputs,label)
                 optim.zero_grad()
                 outputs = model(inputs)
-                if AUGMENTATION:
-                    outputs = data_augmentation.reverse(outputs)
                 loss_cal = loss_func(outputs,inputs,label)
                 loss_cal['loss'].backward()
                 optim.step()

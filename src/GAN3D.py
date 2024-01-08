@@ -119,13 +119,11 @@ class GAN3D(nn.Module):
         running_loss = {}
         for i,data in enumerate(tqdm(train_dataloader)):
             inputs = data['img'].to(self.device)
-            if self.data_augmentation!=None:
-                inputs = self.data_augmentation(inputs)
             label = data['label'].to(self.device)
+            if self.data_augmentation!=None:
+                inputs,label = self.data_augmentation(inputs,label)
             self.optim_G.zero_grad()
             outputs = self.G(inputs)
-            if self.data_augmentation!=None:
-                outputs = self.data_augmentation.reverse(outputs)
             patchGAN_fake_output = self.D(outputs)
             loss_dict = mh_loss(outputs,inputs,label)
             loss_G = F.mse_loss(patchGAN_fake_output,patchGAN_true)

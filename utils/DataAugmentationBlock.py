@@ -23,7 +23,7 @@ class DataAugmenter(nn.Module):
         self.channel_shuffling = channel_shuffling
         self.drop_channel = drop_channnel
 
-    def forward(self, x):
+    def forward(self, x,y):
         with torch.no_grad():
             if random() < self.p:
                 x = x * uniform(0.9, 1.1)
@@ -41,20 +41,12 @@ class DataAugmenter(nn.Module):
                     x[:, sample(range(x.size(1)), 1)] = 0
                     print("channel Dropping")
                 if self.noise_only:
-                    return x
+                    return x,y
                 self.transpose = sample(range(2, x.dim()), 2)
                 self.flip = randint(2, x.dim() - 1)
                 self.toggle = not self.toggle
                 new_x = x.transpose(*self.transpose).flip(self.flip)
-                return new_x
+                new_y = y.transpose(*self.transpose).flip(self.flip)
+                return new_x,new_y
             else:
-                return x
-
-    def reverse(self, x):
-        if self.toggle:
-            self.toggle = not self.toggle
-            for key in x:
-                x[key]=x[key].flip(self.flip).transpose(*self.transpose).contiguous()
-            return x
-        else:
-            return x
+                return x,y
