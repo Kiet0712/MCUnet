@@ -261,3 +261,49 @@ class Dynamic_conv3d(nn.Module):
 
         output = output.view(batch_size, self.out_planes, output.size(-3), output.size(-2), output.size(-1))
         return output
+class MDynamic_conv3d(nn.Module):
+    def __init__(self, in_planes, out_planes, kernel_size, ratio=0.25, stride=1, padding=0, dilation=1, groups=1, bias=False, K=4, temperature=31):
+        super(MDynamic_conv3d, self).__init__()
+        assert in_planes%groups==0
+        self.in_planes = in_planes
+        self.out_planes = out_planes
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilation = dilation
+        self.groups = groups
+        self.bias = bias
+        self.K = K
+        self.attention = attention3d(in_planes, ratio, K, temperature)
+
+        self.weight = nn.Parameter(torch.randn(K, out_planes, in_planes//groups, kernel_size, kernel_size, kernel_size), requires_grad=True)
+        if bias:
+            self.bias = nn.Parameter(torch.zeros(K, out_planes))
+        else:
+            self.bias = None
+
+
+        #TODO 初始化
+        # nn.init.kaiming_uniform_(self.weight, )
+
+    def update_temperature(self):
+        self.attention.updata_temperature()
+
+    def forward(self, x,guide):#将batch视作维度变量，进行组卷积，因为组卷积的权重是不同的，动态卷积的权重也是不同的
+        softmax_attention = self.attention(guide)
+        batch_size, in_planes, depth, height, width = x.size()
+        x = x.view(1, -1, depth, height, width)# 变化成一个维度进行组卷积
+        weight = self.weight.view(self.K, -1)
+
+        # 动态卷积的权重的生成， 生成的是batch_size个卷积参数（每个参数不同）
+        aggregate_weight = torch.mm(softmax_attention, weight).view(batch_size*self.out_planes, self.in_planes//self.groups, self.kernel_size, self.kernel_size, self.kernel_size)
+        if self.bias is not None:
+            aggregate_bias = torch.mm(softmax_attention, self.bias).view(-1)
+            output = F.conv3d(x, weight=aggregate_weight, bias=aggregate_bias, stride=self.stride, padding=self.padding,
+                              dilation=self.dilation, groups=self.groups*batch_size)
+        else:
+            output = F.conv3d(x, weight=aggregate_weight, bias=None, stride=self.stride, padding=self.padding,
+                              dilation=self.dilation, groups=self.groups * batch_size)
+
+        output = output.view(batch_size, self.out_planes, output.size(-3), output.size(-2), output.size(-1))
+        return output
