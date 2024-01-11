@@ -216,7 +216,7 @@ class attention3d(nn.Module):
         return F.softmax(x / self.temperature, 1)
 
 class Dynamic_conv3d(nn.Module):
-    def __init__(self, in_planes, out_planes, kernel_size, ratio=0.25, stride=1, padding=0, dilation=1, groups=1, bias=False, K=4, temperature=30):
+    def __init__(self, in_planes, out_planes, kernel_size, ratio=0.25, stride=1, padding=0, dilation=1, groups=1, bias=False, K=4, temperature=31):
         super(Dynamic_conv3d, self).__init__()
         assert in_planes%groups==0
         self.in_planes = in_planes
