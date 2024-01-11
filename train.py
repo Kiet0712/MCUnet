@@ -19,7 +19,7 @@ from ASRCBGAMHCRFB import ASRCBGAMHCRFB as ASRCBGAMHCRFB
 from SCASRCBGAMHCRFB import SCASRCBGAMHCRFB as SCASRCBGAMHCRFB
 from SRCBDCGAMHCRFB import SRCBDCGAMHCRFB as SRCBDCGAMHCRFB
 from dataset.dataset import BRATS
-from utils.loss import MHLoss_1
+from utils.loss import MHLoss_1,MHLoss_2
 from utils.DataAugmentationBlock import DataAugmenter
 import torch.nn.functional as F
 import numpy as np
@@ -31,6 +31,11 @@ LOAD_CHECK_POINT = False
 GAN_TRAINING = False
 AUGMENTATION = False
 checkpoint_path = ''
+loss_choice = {
+    'MHLoss_1': MHLoss_1,
+    'MHLoss_2': MHLoss_2
+}
+loss_choice_str = ''
 model_choice = {
     'MHCRFB':MHCRFB,
     'AMHCRFB':AMHCRFB,
@@ -168,7 +173,7 @@ def validation(val_dataloader,model):
     mean_metrics_results = np.mean(result_metrics,axis=0)
     print('Validation result:')
     print_validation_result(mean_metrics_results[0],mean_metrics_results[1],mean_metrics_results[2])
-loss_func = MHLoss_1(
+loss_func = loss_choice[loss_choice_str](
     {
         'segment_volume_loss':5,
             'reconstruct_volume_loss':2,
