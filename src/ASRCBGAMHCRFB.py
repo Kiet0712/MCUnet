@@ -66,25 +66,30 @@ class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels,n_channels):
         super(OutConv, self).__init__()
         self.reconstruct_volume_conv = nn.Sequential(
-            nn.Conv3d(in_channels,n_channels,kernel_size=1)
+            nn.Conv3d(in_channels,n_channels,kernel_size=1),
+            nn.Sigmoid()
         )
         self.mask_head = nn.Sequential(
-            nn.Conv3d(in_channels,out_channels*n_channels*2,kernel_size=1)
+            nn.Conv3d(in_channels+n_channels,out_channels*n_channels*2,kernel_size=1),
+            nn.Sigmoid()
         )
         self.class_segment_conv = nn.Sequential(
             nn.Conv3d(in_channels+n_channels*2,out_channels//3,kernel_size=1),
             nn.Sigmoid()
         )
         self.class_variant_guide = DoubleConv(n_channels*2,n_channels*2)
+        self.reconstruct_variant_guide = DoubleConv(n_channels,n_channels)
+        self.attention_class = Attention_block(in_channels,n_channels*2,in_channels//2)
+        self.attention_reconstruct = Attention_block(in_channels,n_channels,in_channels//2)
     def forward(self, x):
         reconstruct_volume = self.reconstruct_volume_conv(x)
-        mask_head = self.mask_head(x)
+        mask_head = self.mask_head(torch.cat([x,self.attention_reconstruct(x,self.reconstruct_variant_guide(reconstruct_volume))],dim=1))
         class_1_guide = self.class_variant_guide(torch.cat([mask_head[:,0:4,:,:,:],mask_head[:,12:16,:,:,:]],dim=1))
         class_2_guide = self.class_variant_guide(torch.cat([mask_head[:,4:8,:,:,:],mask_head[:,16:20,:,:,:]],dim=1))
         class_4_guide = self.class_variant_guide(torch.cat([mask_head[:,8:12,:,:,:],mask_head[:,20:,:,:,:]],dim=1))
-        class_1_segment_vol = self.class_segment_conv(torch.cat([x,class_1_guide],dim=1))
-        class_2_segment_vol = self.class_segment_conv(torch.cat([x,class_2_guide],dim=1))
-        class_4_segment_vol = self.class_segment_conv(torch.cat([x,class_4_guide],dim=1))
+        class_1_segment_vol = self.class_segment_conv(torch.cat([x,self.attention_class(x,class_1_guide)],dim=1))
+        class_2_segment_vol = self.class_segment_conv(torch.cat([x,self.attention_class(x,class_2_guide)],dim=1))
+        class_4_segment_vol = self.class_segment_conv(torch.cat([x,self.attention_class(x,class_4_guide)],dim=1))
         segment_volume = torch.cat([class_4_segment_vol,class_1_segment_vol,class_2_segment_vol],dim=1)
         return {
             'segment_volume':segment_volume,
@@ -328,9 +333,9 @@ class CRFBNetwork(nn.Module):
         x_crfb_2_2_4,x_crfb_2_3_4 = self.CRFB2_4(x2_4,x3_4)
         x_crfb_3_3_4,x_crfb_3_4_4 = self.CRFB3_4(x3_4,x4_4)
         return x_crfb_1_1_4,x_crfb_1_2_4+x_crfb_2_2_4,x_crfb_2_3_4+x_crfb_3_3_4,x_crfb_3_4_4
-class CBGAMHCRFBDMPUnet3D(nn.Module):
+class ASRCBGAMHCRFB(nn.Module):
     def __init__(self, n_channels, n_classes,scale=0.5):
-        super(CBGAMHCRFBDMPUnet3D, self).__init__()
+        super(ASRCBGAMHCRFB, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 

@@ -2,29 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Attention_block(nn.Module):
-    def __init__(self,F_g,F_l,F_int):
-        super().__init__()
-        self.W_g = nn.Sequential(
-            nn.Conv3d(F_g,F_int,1,bias=False),
-            nn.InstanceNorm3d(F_int)
-        )
-        self.W_x = nn.Sequential(
-            nn.Conv3d(F_l,F_int,1,bias=False),
-            nn.InstanceNorm3d(F_int)
-        )
-        self.psi = nn.Sequential(
-            nn.Conv3d(F_int,1,1,bias=False),
-            nn.InstanceNorm3d(1),
-            nn.Sigmoid()
-        )
-        self.relu_ = nn.ReLU(inplace=True)
-    def forward(self,g,x):
-        g1 = self.W_g(g)
-        x1 = self.W_x(x)
-        psi_block = self.relu_(g1+x1)
-        psi_block = self.psi(psi_block)
-        return x*psi_block
+
 class DoubleConv(nn.Module):
     def __init__(self,in_channels,out_channels,mid_channels=None):
         super().__init__()
@@ -56,10 +34,8 @@ class Up(nn.Module):
         super().__init__()
         self.up = nn.ConvTranspose3d(in_channels,in_channels//2,2,2)
         self.conv = DoubleConv(in_channels,out_channels)
-        self.attention = Attention_block(in_channels//2,in_channels//2,in_channels//4)
     def forward(self,x1,x2):
         x1 = self.up(x1)
-        x2 = self.attention(x1,x2)
         x = torch.cat([x1,x2],dim=1)
         return self.conv(x)
 class OutConv(nn.Module):
@@ -326,9 +302,9 @@ class CRFBNetwork(nn.Module):
         x_crfb_2_2_4,x_crfb_2_3_4 = self.CRFB2_4(x2_4,x3_4)
         x_crfb_3_3_4,x_crfb_3_4_4 = self.CRFB3_4(x3_4,x4_4)
         return x_crfb_1_1_4,x_crfb_1_2_4+x_crfb_2_2_4,x_crfb_2_3_4+x_crfb_3_3_4,x_crfb_3_4_4
-class AMHCRFBDMPUnet3D(nn.Module):
+class MHCRFB(nn.Module):
     def __init__(self, n_channels, n_classes,scale=0.5):
-        super(AMHCRFBDMPUnet3D, self).__init__()
+        super(MHCRFB, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 

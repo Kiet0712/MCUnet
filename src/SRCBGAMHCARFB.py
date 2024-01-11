@@ -70,7 +70,7 @@ class OutConv(nn.Module):
             nn.Sigmoid()
         )
         self.mask_head = nn.Sequential(
-            nn.Conv3d(in_channels,out_channels*n_channels*2,kernel_size=1),
+            nn.Conv3d(in_channels+n_channels,out_channels*n_channels*2,kernel_size=1),
             nn.Sigmoid()
         )
         self.class_segment_conv = nn.Sequential(
@@ -78,9 +78,10 @@ class OutConv(nn.Module):
             nn.Sigmoid()
         )
         self.class_variant_guide = DoubleConv(n_channels*2,n_channels*2)
+        self.reconstruct_variant_guide = DoubleConv(n_channels,n_channels)
     def forward(self, x):
         reconstruct_volume = self.reconstruct_volume_conv(x)
-        mask_head = self.mask_head(x)
+        mask_head = self.mask_head(torch.cat([x,self.reconstruct_variant_guide(reconstruct_volume)],dim=1))
         class_1_guide = self.class_variant_guide(torch.cat([mask_head[:,0:4,:,:,:],mask_head[:,12:16,:,:,:]],dim=1))
         class_2_guide = self.class_variant_guide(torch.cat([mask_head[:,4:8,:,:,:],mask_head[:,16:20,:,:,:]],dim=1))
         class_4_guide = self.class_variant_guide(torch.cat([mask_head[:,8:12,:,:,:],mask_head[:,20:,:,:,:]],dim=1))
@@ -203,8 +204,12 @@ class CRFB(nn.Module):
             nn.ReLU(inplace=True),
             nn.ConvTranspose3d(bottom_channels//4,top_channels,2,2,0)
         )
+        self.att_top = Attention_block(top_channels,top_channels,top_channels//2)
+        self.att_bot = Attention_block(bottom_channels,bottom_channels,bottom_channels//2)
     def forward(self,top,bottom):
-        return F.relu(self.deconv(bottom)+top),F.relu(self.conv(top)+bottom)
+        deconv_bottom = self.att_top(top,self.deconv(bottom))
+        conv_top = self.att_bot(bottom,self.conv(top))
+        return F.relu(deconv_bottom+top),F.relu(conv_top+bottom)
 class CRFBNetwork(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
@@ -330,9 +335,9 @@ class CRFBNetwork(nn.Module):
         x_crfb_2_2_4,x_crfb_2_3_4 = self.CRFB2_4(x2_4,x3_4)
         x_crfb_3_3_4,x_crfb_3_4_4 = self.CRFB3_4(x3_4,x4_4)
         return x_crfb_1_1_4,x_crfb_1_2_4+x_crfb_2_2_4,x_crfb_2_3_4+x_crfb_3_3_4,x_crfb_3_4_4
-class SCBGAMHCRFBDMPUnet3D(nn.Module):
+class SRCBGAMHCARFB(nn.Module):
     def __init__(self, n_channels, n_classes,scale=0.5):
-        super(SCBGAMHCRFBDMPUnet3D, self).__init__()
+        super(SRCBGAMHCARFB, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 

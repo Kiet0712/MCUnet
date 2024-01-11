@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from dynamic_conv import Dynamic_conv3d
+
 class Attention_block(nn.Module):
     def __init__(self,F_g,F_l,F_int):
         super().__init__()
@@ -70,18 +70,17 @@ class OutConv(nn.Module):
             nn.Sigmoid()
         )
         self.mask_head = nn.Sequential(
-            nn.Conv3d(in_channels+n_channels,out_channels*n_channels*2,kernel_size=1),
+            nn.Conv3d(in_channels,out_channels*n_channels*2,kernel_size=1),
             nn.Sigmoid()
         )
         self.class_segment_conv = nn.Sequential(
-            Dynamic_conv3d(in_channels+n_channels*2,out_channels//3,1),
+            nn.Conv3d(in_channels+n_channels*2,out_channels//3,kernel_size=1),
             nn.Sigmoid()
         )
-        self.class_variant_guide = Dynamic_conv3d(n_channels*2,n_channels*2,1)
-        self.reconstruct_variant_guide = DoubleConv(n_channels,n_channels)
+        self.class_variant_guide = DoubleConv(n_channels*2,n_channels*2)
     def forward(self, x):
         reconstruct_volume = self.reconstruct_volume_conv(x)
-        mask_head = self.mask_head(torch.cat([x,self.reconstruct_variant_guide(reconstruct_volume)],dim=1))
+        mask_head = self.mask_head(x)
         class_1_guide = self.class_variant_guide(torch.cat([mask_head[:,0:4,:,:,:],mask_head[:,12:16,:,:,:]],dim=1))
         class_2_guide = self.class_variant_guide(torch.cat([mask_head[:,4:8,:,:,:],mask_head[:,16:20,:,:,:]],dim=1))
         class_4_guide = self.class_variant_guide(torch.cat([mask_head[:,8:12,:,:,:],mask_head[:,20:,:,:,:]],dim=1))
@@ -331,9 +330,9 @@ class CRFBNetwork(nn.Module):
         x_crfb_2_2_4,x_crfb_2_3_4 = self.CRFB2_4(x2_4,x3_4)
         x_crfb_3_3_4,x_crfb_3_4_4 = self.CRFB3_4(x3_4,x4_4)
         return x_crfb_1_1_4,x_crfb_1_2_4+x_crfb_2_2_4,x_crfb_2_3_4+x_crfb_3_3_4,x_crfb_3_4_4
-class SRCBDCGAMHCRFBDMPUnet3D(nn.Module):
+class SCBGAMHCRFB(nn.Module):
     def __init__(self, n_channels, n_classes,scale=0.5):
-        super(SRCBDCGAMHCRFBDMPUnet3D, self).__init__()
+        super(SCBGAMHCRFB, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 
