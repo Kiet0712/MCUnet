@@ -85,9 +85,9 @@ class OutConv(nn.Module):
         class_1_guide = self.class_variant_guide(torch.cat([mask_head[:,0:4,:,:,:],mask_head[:,12:16,:,:,:]],dim=1))
         class_2_guide = self.class_variant_guide(torch.cat([mask_head[:,4:8,:,:,:],mask_head[:,16:20,:,:,:]],dim=1))
         class_4_guide = self.class_variant_guide(torch.cat([mask_head[:,8:12,:,:,:],mask_head[:,20:,:,:,:]],dim=1))
-        class_1_segment_vol = self.class_segment_conv(x,class_1_guide)
-        class_2_segment_vol = self.class_segment_conv(x,class_2_guide)
-        class_4_segment_vol = self.class_segment_conv(x,class_4_guide)
+        class_1_segment_vol = F.sigmoid(self.class_segment_conv(x,class_1_guide))
+        class_2_segment_vol = F.sigmoid(self.class_segment_conv(x,class_2_guide))
+        class_4_segment_vol = F.sigmoid(self.class_segment_conv(x,class_4_guide))
         segment_volume = torch.cat([class_4_segment_vol,class_1_segment_vol,class_2_segment_vol],dim=1)
         return {
             'segment_volume':segment_volume,
