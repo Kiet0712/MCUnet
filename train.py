@@ -188,7 +188,7 @@ loss_func = MHLoss_1(
     }
 )
 if not GAN_TRAINING:
-    optim = torch.optim.Adam(model.parameters(),lr=1e-4)
+    optim = torch.optim.Adam(model.parameters(),lr=1e-4,weight_decay=1e-6)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,0.95)
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
