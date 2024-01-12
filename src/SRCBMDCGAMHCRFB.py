@@ -75,8 +75,12 @@ class OutConv(nn.Module):
         )
         self.class_segment_conv = MDynamic_conv3d(in_channels,out_channels//3,1)
         self.class_variant_guide = nn.Sequential(
-            nn.Conv3d(n_channels*2,in_channels,1),
-            nn.BatchNorm3d(in_channels)
+            nn.Conv3d(n_channels*2,in_channels,1,bias=False),
+            nn.BatchNorm3d(in_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv3d(n_channels*2,in_channels,1,bias=False),
+            nn.BatchNorm3d(in_channels),
+            nn.ReLU(inplace=True)
         )
         self.reconstruct_variant_guide = DoubleConv(n_channels,n_channels)
     def forward(self, x):
