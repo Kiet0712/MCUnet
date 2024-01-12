@@ -19,6 +19,7 @@ from ASRCBGAMHCRFB import ASRCBGAMHCRFB as ASRCBGAMHCRFB
 from SCASRCBGAMHCRFB import SCASRCBGAMHCRFB as SCASRCBGAMHCRFB
 from SRCBDCGAMHCRFB import SRCBDCGAMHCRFB as SRCBDCGAMHCRFB
 from SRCBMDCGAMHCRFB import SRCBMDCGAMHCRFB as SRCBMDCGAMHCRFB
+from NSWSRCBMDCGAMHCRFB import NSWSRCBMDCGAMHCRFB as NSWSRCBMDCGAMHCRFB
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1,MHLoss_2
 from utils.DataAugmentationBlock import DataAugmenter
@@ -47,7 +48,8 @@ model_choice = {
     'ASRCBGAMHCRFB':ASRCBGAMHCRFB,
     'SCASRCBGAMHCRFB':SCASRCBGAMHCRFB,
     'SRCBDCGAMHCRFB':SRCBDCGAMHCRFB,
-    'SRCBMDCGAMHCRFB':SRCBMDCGAMHCRFB
+    'SRCBMDCGAMHCRFB':SRCBMDCGAMHCRFB,
+    'NSWSRCBMDCGAMHCRFB':NSWSRCBMDCGAMHCRFB
 }
 model_string = ''
 csv_dir = ''
@@ -224,7 +226,7 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         running_loss[key]=loss_cal[key].item()
                     else:
                         running_loss[key]+=loss_cal[key].item()
-                if i%100==0 and i!=0:
+                if (i%100==0 and i!=0) or i==1000:
                     print('Epoch ' + str(epoch+1) + ', iter ' + str(i+1) + ':')
                     for key in running_loss:
                         print(key + ' = ' + str(running_loss[key]/100))
