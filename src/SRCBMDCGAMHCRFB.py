@@ -78,7 +78,7 @@ class OutConv(nn.Module):
             nn.Conv3d(n_channels*2,in_channels,1,bias=False),
             nn.BatchNorm3d(in_channels),
             nn.ReLU(inplace=True),
-            nn.Conv3d(n_channels*2,in_channels,1,bias=False),
+            nn.Conv3d(in_channels,in_channels,1,bias=False),
             nn.BatchNorm3d(in_channels),
             nn.ReLU(inplace=True)
         )
