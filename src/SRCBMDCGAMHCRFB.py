@@ -79,7 +79,7 @@ class OutConv(nn.Module):
             nn.BatchNorm3d(in_channels+n_channels*2),
             nn.ReLU(inplace=True),
             nn.Conv3d(in_channels+n_channels*2,in_channels+n_channels*2,1,bias=False),
-            nn.BatchNorm3d(in_channels),
+            nn.BatchNorm3d(in_channels+n_channels*2),
             nn.ReLU(inplace=True)
         )
         self.reconstruct_variant_guide = DoubleConv(n_channels,n_channels)
