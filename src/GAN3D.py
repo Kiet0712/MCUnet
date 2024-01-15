@@ -22,6 +22,7 @@ from ASRCBGAMHCMDCFB import ASRCBGAMHCMDCFB as ASRCBGAMHCMDCFB
 from NVNSWASRCBGAMHCRFB import NVNSWASRCBGAMHCRFB as NVNSWASRCBGAMHCRFB
 from NSWASRCBGAMHCRFB import NSWASRCBGAMHCRFB as NSWASRCBGAMHCRFB
 from RNVNSWASRCBGAMHCRFB import RNVNSWASRCBGAMHCRFB as RNVNSWASRCBGAMHCRFB
+from NVNSWRASRCBGAMHCRFB import NVNSWRASRCBGAMHCRFB as NVNSWRASRCBGAMHCRFB
 model_choice = {
     'MHCRFB':MHCRFB,
     'AMHCRFB':AMHCRFB,
@@ -37,7 +38,8 @@ model_choice = {
     'ASRCBGAMHCMDCFB':ASRCBGAMHCMDCFB,
     'NVNSWASRCBGAMHCRFB':NVNSWASRCBGAMHCRFB,
     'NSWASRCBGAMHCRFB':NSWASRCBGAMHCRFB,
-    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB
+    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB,
+    'NVNSWRASRCBGAMHCRFB':NVNSWRASRCBGAMHCRFB
 }
 class DiscriminatorConvBlock(nn.Module):
     def __init__(self,in_channels,out_channels,kernel_size,stride):
@@ -156,7 +158,7 @@ class GAN3D(nn.Module):
                     running_loss[key]=loss_dict[key].item()
                 else:
                     running_loss[key]+=loss_dict[key].item()
-            if (i%100==0 and i!=0) or i==1000:
+            if (i%100==0 and i!=0) or i==999:
                 print('Epoch ' + str(epoch+1) + ', iter ' + str(i+1) + ':')
                 for key in running_loss:
                     print(key + ' = ' + str(running_loss[key]/100))

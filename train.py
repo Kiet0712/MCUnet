@@ -24,6 +24,7 @@ from ASRCBGAMHCMDCFB import ASRCBGAMHCMDCFB as ASRCBGAMHCMDCFB
 from NVNSWASRCBGAMHCRFB import NVNSWASRCBGAMHCRFB as NVNSWASRCBGAMHCRFB
 from NSWASRCBGAMHCRFB import NSWASRCBGAMHCRFB as NSWASRCBGAMHCRFB
 from RNVNSWASRCBGAMHCRFB import RNVNSWASRCBGAMHCRFB as RNVNSWASRCBGAMHCRFB
+from NVNSWRASRCBGAMHCRFB import NVNSWRASRCBGAMHCRFB as NVNSWRASRCBGAMHCRFB
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1,MHLoss_2
 from utils.DataAugmentationBlock import DataAugmenter
@@ -57,7 +58,8 @@ model_choice = {
     'ASRCBGAMHCMDCFB':ASRCBGAMHCMDCFB,
     'NVNSWASRCBGAMHCRFB':NVNSWASRCBGAMHCRFB,
     'NSWASRCBGAMHCRFB':NSWASRCBGAMHCRFB,
-    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB
+    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB,
+    'NVNSWRASRCBGAMHCRFB':NVNSWRASRCBGAMHCRFB
 }
 model_string = ''
 csv_dir = ''
@@ -234,7 +236,7 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         running_loss[key]=loss_cal[key].item()
                     else:
                         running_loss[key]+=loss_cal[key].item()
-                if (i%100==0 and i!=0) or i==1000:
+                if (i%100==0 and i!=0) or i==999:
                     print('Epoch ' + str(epoch+1) + ', iter ' + str(i+1) + ':')
                     for key in running_loss:
                         print(key + ' = ' + str(running_loss[key]/100))
