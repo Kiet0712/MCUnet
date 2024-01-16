@@ -214,6 +214,7 @@ if LOAD_CHECK_POINT:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optim.load_state_dict(checkpoint['optim_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler'])
     else:
         model.load_checkpoint(checkpoint_path)
 def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
@@ -248,9 +249,11 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
-                        'optim_state_dict':optim.state_dict()
+                        'optim_state_dict':optim.state_dict(),
+                        'scheduler': scheduler.state_dict()
                     },checkpoint_save_path
                  )
+            scheduler.step()
         else:
             model.one_epoch(train_dataloader,loss_func,epoch)
             if epoch%save_each_epoch==0:
