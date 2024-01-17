@@ -418,8 +418,8 @@ def visualize(infor: list,mode: list):
                 }
                 for class_value in ['1','2','4']:
                     base_name = 'class_'
-                    for type_mask in ['foreground,background']:
-                        for type_plot in ['gt,predict']:
+                    for type_mask in ['foreground','background']:
+                        for type_plot in ['gt','predict']:
                             name_obj = base_name+class_value+'_'+type_mask+'_'+type_plot
                             axs[count,0].imshow(dict_mask[name_obj][0,:,:,layer],cmap='gray')
                             axs[count,0].set_title('flair class ' + mask_value_label[class_value] + ' ' + type_mask + ' ' + type_plot + str(layer)) 
@@ -430,6 +430,7 @@ def visualize(infor: list,mode: list):
                             axs[count,3].imshow(dict_mask[name_obj][3,:,:,layer],cmap='gray')
                             axs[count,3].set_title('t2 class ' + mask_value_label[class_value] + ' ' + type_mask + ' ' + type_plot + str(layer)) 
                             count+=1
+            interact(multi_head_visualize_input_label_output_model,layer=(0,inputs.shape[3]-1))
         else:
             pass
     else:
