@@ -291,9 +291,9 @@ def visualize(infor: list,mode: list):
             axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
             axs[1,2].set_title('WT ' + str(layer))
             mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
-            mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
-            mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
             mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
+            mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
+            mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
             axs[1,3].imshow(mask_label)
             axs[1,3].set_title('Mask label')
         interact(visualize_input_and_label,layer=(0,inputs.shape[3]-1))
@@ -319,9 +319,9 @@ def visualize(infor: list,mode: list):
                 axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
                 axs[1,2].set_title('WT ' + str(layer))
                 mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
-                mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
-                mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
                 mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
+                mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
+                mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
                 axs[1,3].imshow(mask_label)
                 axs[1,3].set_title('Mask label ' + str(layer))
                 axs[2,0].imshow(outputs[0,:,:,layer],cmap='gray')
@@ -331,9 +331,9 @@ def visualize(infor: list,mode: list):
                 axs[2,2].imshow(outputs[2,:,:,layer],cmap='gray')
                 axs[2,2].set_title('WT predict' + str(layer))
                 mask_label_predict = np.zeros_like(outputs[0,:,:,layer],dtype=np.uint8)
-                mask_label_predict[np.where(outputs[0,:,:,layer]==1)[0],np.where(outputs[0,:,:,layer]==1)[1]] = 4
-                mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
                 mask_label_predict[np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[1]]=2
+                mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
+                mask_label_predict[np.where(outputs[0,:,:,layer]==1)[0],np.where(outputs[0,:,:,layer]==1)[1]] = 4
                 axs[2,3].imshow(mask_label_predict)
                 axs[2,3].set_title('Mask label predict ' + str(layer))
             interact(one_head_visualize_input_label_output_model,layer=(0,inputs.shape[3]-1))
@@ -393,9 +393,9 @@ def visualize(infor: list,mode: list):
                 axs[2,2].imshow(label[2,:,:,layer],cmap='gray')
                 axs[2,2].set_title('WT ' + str(layer))
                 mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
-                mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
-                mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
                 mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
+                mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
+                mask_label[np.where(label[0,:,:,layer]==1)[0],np.where(label[0,:,:,layer]==1)[1]] = 4
                 axs[2,3].imshow(mask_label)
                 axs[2,3].set_title('Mask label ' + str(layer))
                 axs[3,0].imshow(outputs[0,:,:,layer],cmap='gray')
@@ -405,9 +405,9 @@ def visualize(infor: list,mode: list):
                 axs[3,2].imshow(outputs[2,:,:,layer],cmap='gray')
                 axs[3,2].set_title('WT predict' + str(layer))
                 mask_label_predict = np.zeros_like(outputs[0,:,:,layer],dtype=np.uint8)
-                mask_label_predict[np.where(outputs[0,:,:,layer]==1)[0],np.where(outputs[0,:,:,layer]==1)[1]] = 4
-                mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
                 mask_label_predict[np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[1]]=2
+                mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
+                mask_label_predict[np.where(outputs[0,:,:,layer]==1)[0],np.where(outputs[0,:,:,layer]==1)[1]] = 4
                 axs[3,3].imshow(mask_label_predict)
                 axs[3,3].set_title('Mask label predict ' + str(layer))
                 count = 4
