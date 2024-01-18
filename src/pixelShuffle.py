@@ -40,7 +40,7 @@ class ConvWithPixelShuffle(nn.Module):
         self.conv1 = nn.Conv3d(in_channels, 2 * in_channels, 5, 1, 2)
         self.tanh = nn.Tanh()
         self.conv2 = nn.Conv3d(2 * in_channels, out_channels * n, 3, 1, 1)
-        self.pixelshuffle = PixelShuffle3d(upscale_factor=scales, out_channels=out_channels)
+        self.pixelshuffle = PixelShuffle3d(upscale_factor=[scales,scales,scales], out_channels=out_channels)
 
     def forward(self, x):
         y = self.conv1(x)

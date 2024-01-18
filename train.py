@@ -255,6 +255,34 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                 torch.backends.cudnn.benchmark = False
                 validation(val_dataloader,model.G)
                 model.save_checkpoint(checkpoint_save_path)
+from monai.inferers import sliding_window_inference
+class Wrapper:
+  def __init__(self,model):
+    self.model = model
+  def __call__(self, x):
+    return self.model(x)['segment_volume']
+def validation_sliding_window(val_dataloader,model):
+    result_metrics = []
+    for i,data in enumerate(tqdm(val_dataloader)):
+        inputs = data['img']
+        crop_idx = data['crop_indices']
+        inputs,pad = pad_batch1_to_compatible_size(inputs)
+        inputs = inputs.to(device)
+        gt_seg_volume = data['label']
+        with torch.inference_mode():
+            predict_segment_volume = sliding_window_inference(inputs,roi_size=[128,128,128],sw_batch_size=1,overlap=0.7,predictor=model)
+        maxz,maxy,maxx = predict_segment_volume.size(2)-pad[0],predict_segment_volume.size(3)-pad[1],predict_segment_volume.size(4)-pad[2]
+        predict_segment_volume = predict_segment_volume[:,:,0:maxz,0:maxy,0:maxx].cpu().numpy()
+        predict_seg_volume = np.zeros(gt_seg_volume.shape)
+        predict_seg_volume[:,:,slice(*crop_idx[0]),slice(*crop_idx[1]),slice(*crop_idx[2])] = predict_segment_volume
+        segs = (predict_seg_volume[0]>0.5).astype('float32')
+        patient_metrics_result = calculate_metrics(segs,gt_seg_volume[0].numpy()) 
+        if len(patient_metrics_result)!=0:
+            result_metrics.append(patient_metrics_result)
+    result_metrics = np.array(result_metrics)
+    mean_metrics_results = np.mean(result_metrics,axis=0)
+    print('Validation result:')
+    print_validation_result(mean_metrics_results[0],mean_metrics_results[1],mean_metrics_results[2])
 train(
     train_dataloader,
     model,
@@ -264,6 +292,7 @@ train(
     2,
     'CHECKPOINT_' + model_string + datetime.now().strftime('%H-%M-%S_%d-%m-%Y') + '.pth'
 )
+validation_sliding_window(val_dataloader,Wrapper(model))
 import itk                                                                
 import itkwidgets
 from ipywidgets import interact, interactive, IntSlider, ToggleButtons
