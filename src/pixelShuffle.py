@@ -12,12 +12,11 @@ class PixelShuffle3d(nn.Module):
         :param scale: upsample scale
         """
         super().__init__()
-        self.scale = upscale_factor
+        self.scale = np.array(upscale_factor)
         self.out_channels = out_channels
 
     def forward(self, x):
         batch_size, channels, in_depth, in_height, in_width = x.size()
-        self.scale = np.array(self.scale)
         n = np.sum(self.scale == 2)
         assert channels % (2 ** n) == 0
         nOut = self.out_channels
@@ -36,7 +35,7 @@ class PixelShuffle3d(nn.Module):
 class ConvWithPixelShuffle(nn.Module):
     def __init__(self, in_channels, out_channels, scales):
         super().__init__()
-        n = np.prod(scales)
+        n = np.prod([scales,scales,scales])
         self.conv1 = nn.Conv3d(in_channels, 2 * in_channels, 5, 1, 2)
         self.tanh = nn.Tanh()
         self.conv2 = nn.Conv3d(2 * in_channels, out_channels * n, 3, 1, 1)
