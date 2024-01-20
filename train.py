@@ -56,46 +56,6 @@ if GAN_TRAINING:
 else:
     model = get_model(model_string)(4,3)
     model.to(device)
-def pad_batch1_to_compatible_size(batch):
-    shape = batch.shape
-    zyx = list(shape[-3:])
-    for i, dim in enumerate(zyx):
-        max_stride = 16
-        if dim % max_stride != 0:
-            # Make it divisible by 16
-            zyx[i] = ((dim // max_stride) + 1) * max_stride
-    zmax, ymax, xmax = zyx
-    zpad, ypad, xpad = zmax - batch.size(2), ymax - batch.size(3), xmax - batch.size(4)
-    assert all(pad >= 0 for pad in (zpad, ypad, xpad)), "Negative padding value error !!"
-    pads = (0, xpad, 0, ypad, 0, zpad)
-    batch = F.pad(batch, pads)
-    return batch, (zpad, ypad, xpad)
-def calculate_metrics(predict,gt):
-    labels = ["ET", "TC", "WT"]
-    results = []
-    for i, label in enumerate(labels):
-        if np.sum(gt[i])==0:
-            print('Remove sample')
-            print('Non '  + label)
-            return []
-        preds_coords = np.argwhere(predict[i])
-        targets_coords = np.argwhere(gt[i])
-        haussdorf_dist = directed_hausdorff(preds_coords, targets_coords)[0]
-        tp = np.sum((predict[i]==1)&(gt[i]==1))
-        tn = np.sum((predict[i]==0)&(gt[i]==0))
-        fp = np.sum((predict[i]==1)&(gt[i]==0))
-        fn = np.sum((predict[i]==0)&(gt[i]==1))
-        sens = tp/(tp+fn)
-        spec = tn/(tn+fp)
-        dice = 2*tp/(2*tp+fp+fn)
-        results.append([
-            haussdorf_dist,
-            sens,
-            spec,
-            dice
-        ])
-    return results
-
 PLOT= {
     'et':[],
     'tc':[],
