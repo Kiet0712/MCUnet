@@ -19,7 +19,6 @@ from utils.batch_utils import pad_batch1_to_compatible_size
 from utils.metric import calculate_metrics
 import torch.nn.functional as F
 import numpy as np
-from scipy.spatial.distance import directed_hausdorff
 from datetime import datetime
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
