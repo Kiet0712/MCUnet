@@ -8,20 +8,8 @@ path_code = ''
 sys.path.append(path_code)
 from torch.utils.data import DataLoader
 import torch
-from MHCRFB import MHCRFB as MHCRFB
-from AttentionMHCRFB import AMHCRFB as AMHCRFB
-from ClassBaseGuideAMHCRFB import CBGAMHCRFB as CBGAMHCRFB
 from GAN3D import GAN3D as GAN3D
-from RClassBaseGuideAMHCRFB import RCBGAMHCRFB as RCBGAMHCRFB
-from SRCBGAMHCARFB import SRCBGAMHCARFB as SRCBGAMHCARFB
-from SCBGAMHCRFB import SCBGAMHCRFB as SCBGAMHCRFB
-from ASRCBGAMHCRFB import ASRCBGAMHCRFB as ASRCBGAMHCRFB
-from SCASRCBGAMHCRFB import SCASRCBGAMHCRFB as SCASRCBGAMHCRFB
-from NVNSWASRCBGAMHCRFB import NVNSWASRCBGAMHCRFB as NVNSWASRCBGAMHCRFB
-from NSWASRCBGAMHCRFB import NSWASRCBGAMHCRFB as NSWASRCBGAMHCRFB
-from RNVNSWASRCBGAMHCRFB import RNVNSWASRCBGAMHCRFB as RNVNSWASRCBGAMHCRFB
-from NVNSWRASRCBGAMHCRFB import NVNSWRASRCBGAMHCRFB as NVNSWRASRCBGAMHCRFB
-from FNVNSWASRCBGAMHCRFB import FNVNSWASRCBGAMHCRFB as FNVNSWASRCBGAMHCRFB
+from src.model_zoo import get_model
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1,MHLoss_2
 from utils.DataAugmentationBlock import DataAugmenter
@@ -44,21 +32,6 @@ loss_choice = {
     'MHLoss_2': MHLoss_2
 }
 loss_choice_str = ''
-model_choice = {
-    'MHCRFB':MHCRFB,
-    'AMHCRFB':AMHCRFB,
-    'CBGAMHCRFB':CBGAMHCRFB,
-    'RCBGAMHCRFB':RCBGAMHCRFB,
-    'SCBGAMHCRFB':SCBGAMHCRFB,
-    'SRCBGAMHCARFB':SRCBGAMHCARFB,
-    'ASRCBGAMHCRFB':ASRCBGAMHCRFB,
-    'SCASRCBGAMHCRFB':SCASRCBGAMHCRFB,
-    'NVNSWASRCBGAMHCRFB':NVNSWASRCBGAMHCRFB,
-    'NSWASRCBGAMHCRFB':NSWASRCBGAMHCRFB,
-    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB,
-    'NVNSWRASRCBGAMHCRFB':NVNSWRASRCBGAMHCRFB,
-    'FNVNSWASRCBGAMHCRFB':FNVNSWASRCBGAMHCRFB
-}
 model_string = ''
 csv_dir = ''
 root_dir = ''
@@ -81,7 +54,7 @@ if AUGMENTATION:
 if GAN_TRAINING:
     model = GAN3D(4,3,device,0.1,model_string,data_augmentation)
 else:
-    model = model_choice[model_string](4,3)
+    model = get_model(model_string)(4,3)
     model.to(device)
 def pad_batch1_to_compatible_size(batch):
     shape = batch.shape

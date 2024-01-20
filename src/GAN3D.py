@@ -7,34 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 from tqdm.auto import tqdm
-from MHCRFB import MHCRFB as MHCRFB
-from AttentionMHCRFB import AMHCRFB as AMHCRFB
-from ClassBaseGuideAMHCRFB import CBGAMHCRFB as CBGAMHCRFB
-from RClassBaseGuideAMHCRFB import RCBGAMHCRFB as RCBGAMHCRFB
-from SRCBGAMHCARFB import SRCBGAMHCARFB as SRCBGAMHCARFB
-from SCBGAMHCRFB import SCBGAMHCRFB as SCBGAMHCRFB
-from ASRCBGAMHCRFB import ASRCBGAMHCRFB as ASRCBGAMHCRFB
-from SCASRCBGAMHCRFB import SCASRCBGAMHCRFB as SCASRCBGAMHCRFB
-from NVNSWASRCBGAMHCRFB import NVNSWASRCBGAMHCRFB as NVNSWASRCBGAMHCRFB
-from NSWASRCBGAMHCRFB import NSWASRCBGAMHCRFB as NSWASRCBGAMHCRFB
-from RNVNSWASRCBGAMHCRFB import RNVNSWASRCBGAMHCRFB as RNVNSWASRCBGAMHCRFB
-from NVNSWRASRCBGAMHCRFB import NVNSWRASRCBGAMHCRFB as NVNSWRASRCBGAMHCRFB
-from FNVNSWASRCBGAMHCRFB import FNVNSWASRCBGAMHCRFB as FNVNSWASRCBGAMHCRFB
-model_choice = {
-    'MHCRFB':MHCRFB,
-    'AMHCRFB':AMHCRFB,
-    'CBGAMHCRFB':CBGAMHCRFB,
-    'RCBGAMHCRFB':RCBGAMHCRFB,
-    'SCBGAMHCRFB':SCBGAMHCRFB,
-    'SRCBGAMHCARFB':SRCBGAMHCARFB,
-    'ASRCBGAMHCRFB':ASRCBGAMHCRFB,
-    'SCASRCBGAMHCRFB':SCASRCBGAMHCRFB,
-    'NVNSWASRCBGAMHCRFB':NVNSWASRCBGAMHCRFB,
-    'NSWASRCBGAMHCRFB':NSWASRCBGAMHCRFB,
-    'RNVNSWASRCBGAMHCRFB':RNVNSWASRCBGAMHCRFB,
-    'NVNSWRASRCBGAMHCRFB':NVNSWRASRCBGAMHCRFB,
-    'FNVNSWASRCBGAMHCRFB':FNVNSWASRCBGAMHCRFB
-}
+from model_zoo import get_model
 class DiscriminatorConvBlock(nn.Module):
     def __init__(self,in_channels,out_channels,kernel_size,stride):
         super().__init__()
@@ -100,7 +73,7 @@ class DiscriminatorLoss(nn.Module):
 class GAN3D(nn.Module):
     def __init__(self,n_channels, n_classes,device,weigt_adversarial,model_choice_str,data_augmentation):
         super().__init__()
-        self.G = model_choice[model_choice_str](n_channels,n_classes).to(device)
+        self.G = get_model(model_choice_str)(n_channels,n_classes).to(device)
         self.D = Discriminator(128,device).to(device)
         self.optim_G = torch.optim.Adam(self.G.parameters(),2e-4,(0.5,0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),2e-4,(0.5,0.999))
