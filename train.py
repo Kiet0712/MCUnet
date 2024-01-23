@@ -8,6 +8,7 @@ path_code = ''
 sys.path.append(path_code)
 from torch.utils.data import DataLoader
 import torch
+#from ranger21 import Ranger21
 from GAN3D import GAN3D as GAN3D
 from src.model_zoo import get_model
 from dataset.dataset import BRATS
@@ -139,6 +140,7 @@ loss_func = loss_choice[loss_choice_str](
 )
 if not GAN_TRAINING:
     optim = torch.optim.Adam(model.parameters(),lr=1.25e-4,weight_decay=1e-6)
+    #optim = Ranger21(model.parameters(),lr=0.003,weight_decay=1e-6,num_batches_per_epoch=1000,num_epochs=100)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim,"max",0.9,3,min_lr=5e-6,verbose=True)
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
