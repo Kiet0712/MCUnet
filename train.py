@@ -117,6 +117,7 @@ def validation(val_dataloader,model):
     mean_metrics_results = np.mean(result_metrics,axis=0)
     print('Validation result:')
     print_validation_result(mean_metrics_results[0],mean_metrics_results[1],mean_metrics_results[2])
+    return np.mean(mean_metrics_results,axis=0)[-1]
 loss_func = loss_choice[loss_choice_str](
     {
         'segment_volume_loss':5,
@@ -137,8 +138,8 @@ loss_func = loss_choice[loss_choice_str](
     }
 )
 if not GAN_TRAINING:
-    optim = torch.optim.Adam(model.parameters(),lr=1e-4,weight_decay=1e-6)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optim,0.95)
+    optim = torch.optim.Adam(model.parameters(),lr=1.25e-4,weight_decay=1e-6)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim,"max",0.9,3,min_lr=5e-6,verbose=True)
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
         checkpoint = torch.load(checkpoint_path)
@@ -175,7 +176,7 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
                 torch.backends.cudnn.benchmark = False
-                validation(val_dataloader,model)
+                scheduler.step(validation(val_dataloader,model))
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
@@ -183,7 +184,6 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         'scheduler': scheduler.state_dict()
                     },checkpoint_save_path
                  )
-            scheduler.step()
         else:
             model.one_epoch(train_dataloader,loss_func,epoch)
             if epoch%save_each_epoch==0:
