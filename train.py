@@ -8,7 +8,7 @@ path_code = ''
 sys.path.append(path_code)
 from torch.utils.data import DataLoader
 import torch
-#from ranger21 import Ranger21
+from utils.ranger21 import Ranger21
 from GAN3D import GAN3D as GAN3D
 from src.model_zoo import get_model
 from dataset.dataset import BRATS
@@ -139,15 +139,12 @@ loss_func = loss_choice[loss_choice_str](
     }
 )
 if not GAN_TRAINING:
-    optim = torch.optim.Adam(model.parameters(),lr=1.25e-4,weight_decay=1e-6)
-    #optim = Ranger21(model.parameters(),lr=0.003,weight_decay=1e-6,num_batches_per_epoch=1000,num_epochs=100)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim,"max",0.9,3,min_lr=5e-6,verbose=True)
+    optim = Ranger21(model.parameters(),lr=0.003,weight_decay=1e-6,num_batches_per_epoch=1000,num_epochs=100)
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optim.load_state_dict(checkpoint['optim_state_dict'])
-        scheduler.load_state_dict(checkpoint['scheduler'])
     else:
         model.load_checkpoint(checkpoint_path)
 def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
@@ -178,12 +175,11 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
             if epoch%save_each_epoch==0:
                 print('================================VALIDATION ' + str(epoch+1)+'================================')
                 torch.backends.cudnn.benchmark = False
-                scheduler.step(validation(val_dataloader,model))
+                validation(val_dataloader,model)
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
-                        'optim_state_dict':optim.state_dict(),
-                        'scheduler': scheduler.state_dict()
+                        'optim_state_dict':optim.state_dict()
                     },checkpoint_save_path
                  )
         else:
