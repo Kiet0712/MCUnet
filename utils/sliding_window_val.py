@@ -5,10 +5,21 @@ from tqdm.auto import tqdm
 from batch_utils import pad_batch1_to_compatible_size
 from metric import calculate_metrics
 class Wrapper:
-  def __init__(self,model):
+  def __init__(self,model,wrapper_type):
     self.model = model
+    self.wrapper_type = wrapper_type
   def __call__(self, x):
-    return self.model(x)['segment_volume']
+    if self.wrapper_type=='normal':
+       return self.model(x)['segment_volume']
+    elif self.wrapper_type=='foreground_cover':
+       output = self.model(x)
+       segment_volume = output['segment_volume']
+       class_1_foreground = torch.mean(output['class_1_foreground'],dim=1,keepdim=True)
+       class_2_foreground = torch.mean(output['class_2_foreground'],dim=1,keepdim=True)
+       class_4_foreground = torch.mean(output['class_4_foreground'],dim=1,keepdim=True)
+       foreground = (torch.cat([class_4_foreground,class_1_foreground,class_2_foreground],dim=1)>=0.01).type(segment_volume.dtype)
+       return segment_volume*foreground
+
 def print_validation_result(et, tc, wt, name_metrics=["HDis      ", "Sens      ", "Spec      ", "Dice"]):
     """
     Prints the Validation result with corresponding name metrics for three numpy arrays.
@@ -32,7 +43,8 @@ def print_validation_result(et, tc, wt, name_metrics=["HDis      ", "Sens      "
     print("ET:  ", *et)  # Print ET row with values
     print("TC:  ", *tc)  # Print TC row with values
     print("WT:  ", *wt)  # Print WT row with values
-def validation_sliding_window(val_dataloader,model,device):
+def validation_sliding_window(val_dataloader,model,device,wrapper_type: str):
+    model = Wrapper(model,wrapper_type)
     result_metrics = []
     for i,data in enumerate(tqdm(val_dataloader)):
         inputs = data['img']
