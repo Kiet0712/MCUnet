@@ -14,7 +14,7 @@ from src.model_zoo import get_model
 from dataset.dataset import BRATS
 from utils.loss import MHLoss_1,MHLoss_2
 from utils.DataAugmentationBlock import DataAugmenter
-from utils.sliding_window_val import validation_sliding_window,Wrapper
+from utils.sliding_window_val import validation_sliding_window
 from utils.visualize_result import visualize
 from utils.batch_utils import pad_batch1_to_compatible_size
 from utils.metric import calculate_metrics
@@ -198,5 +198,6 @@ train(
     2,
     'CHECKPOINT_' + model_string + datetime.now().strftime('%H-%M-%S_%d-%m-%Y') + '.pth'
 )
-validation_sliding_window(val_dataloader,Wrapper(model),device)
+wrapper_type = ''
+validation_sliding_window(val_dataloader,model,device,wrapper_type)
 
