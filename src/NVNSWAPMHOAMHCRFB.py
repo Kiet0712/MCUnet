@@ -94,15 +94,15 @@ class OutConv(nn.Module):
             nn.ReLU(inplace=True)
         )
         self.segment_volume_conv_1 = nn.Sequential(
-            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.Conv3d(32+n_channels*2,out_channels//3,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.segment_volume_conv_2 = nn.Sequential(
-            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.Conv3d(32+n_channels*2,out_channels//3,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.segment_volume_conv_4 = nn.Sequential(
-            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.Conv3d(32+n_channels*2,out_channels//3,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.attention_reconstruct = Attention_block(in_channels,n_channels,in_channels//2)
