@@ -41,7 +41,7 @@ class DoubleConv(nn.Module):
             nn.Conv3d(in_channels,out_channels,1,1)
         )
     def forward(self,x):
-        return F.relu(self.double_conv(x)+self.conv_skip_connection(x))
+        return F.relu(self.double_conv(x)+self.conv_skip_connection(x),True)
 class Down(nn.Module):
     def __init__(self,in_channels,out_channels):
         super().__init__()
@@ -105,10 +105,10 @@ class OutConv(nn.Module):
             nn.Conv3d(32+n_channels*2,out_channels//3,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
-        self.attention_reconstruct = Attention_block(in_channels,n_channels,in_channels//2)
-        self.attention_class_1 = Attention_block(in_channels,n_channels*2,in_channels//2)
-        self.attention_class_2 = Attention_block(in_channels,n_channels*2,in_channels//2)
-        self.attention_class_4 = Attention_block(in_channels,n_channels*2,in_channels//2)
+        self.attention_reconstruct = Attention_block(in_channels,n_channels,in_channels//4)
+        self.attention_class_1 = Attention_block(in_channels,n_channels*2,in_channels//4)
+        self.attention_class_2 = Attention_block(in_channels,n_channels*2,in_channels//4)
+        self.attention_class_4 = Attention_block(in_channels,n_channels*2,in_channels//4)
     def forward(self, x):
         reconstruct_volume = self.reconstruct_volume_conv(x)
         mask_head = self.mask_head_conv(torch.cat([x,self.attention_reconstruct(x,reconstruct_volume)],dim=1))
@@ -155,7 +155,7 @@ class MP1(nn.Module):
         x_2_path = self.conv2(x2)
         x_3_path = self.conv3(x3)
         x_4_path = self.conv4(x4)
-        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1))
+        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1),True)
 class MP2(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
@@ -173,7 +173,7 @@ class MP2(nn.Module):
         x_2_path = self.conv2(x2)
         x_3_path = self.conv3(x3)
         x_4_path = self.conv4(x4)
-        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1))
+        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1),True)
 class MP3(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
@@ -191,7 +191,7 @@ class MP3(nn.Module):
         x_2_path = self.conv2(x2)
         x_3_path = self.conv3(x3)
         x_4_path = self.conv4(x4)
-        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1))
+        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1),True)
 class MP4(nn.Module):
     def __init__(self,scale) -> None:
         super().__init__()
@@ -217,7 +217,7 @@ class MP4(nn.Module):
         x_2_path = self.conv2(x2)
         x_3_path = self.conv3(x3)
         x_4_path = self.conv4(x4)
-        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1))
+        return F.relu(torch.cat([x_1_path,x_2_path,x_3_path,x_4_path],dim=1),True)
 class CRFB(nn.Module):
     def __init__(self,top_channels,bottom_channels):
         super().__init__()
@@ -236,7 +236,7 @@ class CRFB(nn.Module):
             nn.ConvTranspose3d(bottom_channels//4,top_channels,2,2,0)
         )
     def forward(self,top,bottom):
-        return F.relu(self.deconv(bottom)+top),F.relu(self.conv(top)+bottom)
+        return F.relu(self.deconv(bottom)+top,True),F.relu(self.conv(top)+bottom,True)
 class CRFBNetwork(nn.Module):
     def __init__(self, scale) -> None:
         super().__init__()
