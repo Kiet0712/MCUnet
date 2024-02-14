@@ -8,7 +8,6 @@ path_code = ''
 sys.path.append(path_code)
 from torch.utils.data import DataLoader
 import torch
-from utils.ranger21 import Ranger21
 from GAN3D import GAN3D as GAN3D
 from src.model_zoo import get_model
 from dataset.dataset import BRATS
@@ -140,7 +139,19 @@ loss_func = loss_choice[loss_choice_str](
     }
 )
 if not GAN_TRAINING:
-    optim = Ranger21(model.parameters(),lr=0.003,weight_decay=1e-6,num_batches_per_epoch=1000,num_epochs=100)
+    optim = torch.optim.Adam(model.parameters(),1e-4,weight_decay=1e-6)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optim,
+        lr_lambda= lambda epoch: 1 if epoch >= 1 and epoch < 5
+                                else 5 if epoch >= 5 and epoch < 10
+                                else 10 if epoch >= 10 and epoch < 20
+                                else 20 if epoch >= 20 and epoch < 25
+                                else 10 if epoch >= 25 and epoch < 30
+                                else 5 if epoch >= 30 and epoch < 40
+                                else 1 if epoch >= 40 and epoch < 80
+                                else 0.1 if epoch >= 80 and epoch < 90
+                                else 0.01
+    )
 start_epoch = 0
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
@@ -149,6 +160,7 @@ if LOAD_CHECK_POINT:
         optim.load_state_dict(checkpoint['optim_state_dict'])
         PLOT = checkpoint['plot']
         start_epoch = checkpoint['epoch']
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
     else:
         model.load_checkpoint(checkpoint_path)
 def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
@@ -185,9 +197,11 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                         'model_state_dict':model.state_dict(),
                         'optim_state_dict':optim.state_dict(),
                         'epoch': epoch,
-                        'plot': PLOT
+                        'plot': PLOT,
+                        'scheduler_state_dict':scheduler.state_dict()
                     },checkpoint_save_path
                  )
+            scheduler.step()
         else:
             model.one_epoch(train_dataloader,loss_func,epoch)
             if epoch%save_each_epoch==0:
