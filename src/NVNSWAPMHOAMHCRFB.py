@@ -85,34 +85,24 @@ class OutConv(nn.Module):
             nn.Conv3d(32,out_channels*n_channels*2,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
-        self.segment_volume_conv_1 = nn.Sequential(
-            nn.Conv3d(in_channels+n_channels*2,32,kernel_size=3,padding=2,dilation=2,bias=False),
+        self.segment_volume_conv_featrue = nn.Sequential(
+            nn.Conv3d(in_channels,32,kernel_size=3,padding=2,dilation=2,bias=False),
             nn.InstanceNorm3d(32),
             nn.ReLU(inplace=True),
             nn.Conv3d(32,32,kernel_size=3,padding=2,dilation=2,bias=False),
             nn.InstanceNorm3d(32),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(32,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.ReLU(inplace=True)
+        )
+        self.segment_volume_conv_1 = nn.Sequential(
+            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.segment_volume_conv_2 = nn.Sequential(
-            nn.Conv3d(in_channels+n_channels*2,32,kernel_size=3,padding=2,dilation=2,bias=False),
-            nn.InstanceNorm3d(32),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(32,32,kernel_size=3,padding=2,dilation=2,bias=False),
-            nn.InstanceNorm3d(32),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(32,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.segment_volume_conv_4 = nn.Sequential(
-            nn.Conv3d(in_channels+n_channels*2,32,kernel_size=3,padding=2,dilation=2,bias=False),
-            nn.InstanceNorm3d(32),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(32,32,kernel_size=3,padding=2,dilation=2,bias=False),
-            nn.InstanceNorm3d(32),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(32,out_channels,kernel_size=1,padding=1//2,bias=True),
+            nn.Conv3d(32+n_channels*2,out_channels,kernel_size=1,padding=1//2,bias=True),
             nn.Sigmoid()
         )
         self.attention_reconstruct = Attention_block(in_channels,n_channels,in_channels//2)
@@ -125,9 +115,10 @@ class OutConv(nn.Module):
         class_1_guide = torch.cat([mask_head[:,0:4,:,:,:],mask_head[:,12:16,:,:,:]],dim=1)
         class_2_guide = torch.cat([mask_head[:,4:8,:,:,:],mask_head[:,16:20,:,:,:]],dim=1)
         class_4_guide = torch.cat([mask_head[:,8:12,:,:,:],mask_head[:,20:,:,:,:]],dim=1)
-        class_1_segment_vol = self.segment_volume_conv_1(torch.cat([x,self.attention_class_1(x,class_1_guide)],dim=1))
-        class_2_segment_vol = self.segment_volume_conv_2(torch.cat([x,self.attention_class_2(x,class_2_guide)],dim=1))
-        class_4_segment_vol = self.segment_volume_conv_4(torch.cat([x,self.attention_class_4(x,class_4_guide)],dim=1))
+        segment_vol_feature = self.segment_volume_conv_featrue(x)
+        class_1_segment_vol = self.segment_volume_conv_1(torch.cat([segment_vol_feature,self.attention_class_1(segment_vol_feature,class_1_guide)],dim=1))
+        class_2_segment_vol = self.segment_volume_conv_2(torch.cat([segment_vol_feature,self.attention_class_2(segment_vol_feature,class_2_guide)],dim=1))
+        class_4_segment_vol = self.segment_volume_conv_4(torch.cat([segment_vol_feature,self.attention_class_4(segment_vol_feature,class_4_guide)],dim=1))
         segment_volume = torch.cat([class_4_segment_vol,class_1_segment_vol,class_2_segment_vol],dim=1)
         return {
             'segment_volume':segment_volume,
