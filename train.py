@@ -23,6 +23,7 @@ import numpy as np
 from datetime import datetime
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
+
 LOAD_CHECK_POINT = False
 GAN_TRAINING = False
 AUGMENTATION = False
@@ -56,7 +57,7 @@ if GAN_TRAINING:
 else:
     model = get_model(model_string)(4,3)
     model.to(device)
-PLOT= {
+PLOT = {
     'et':[],
     'tc':[],
     'wt':[]
@@ -140,15 +141,18 @@ loss_func = loss_choice[loss_choice_str](
 )
 if not GAN_TRAINING:
     optim = Ranger21(model.parameters(),lr=0.003,weight_decay=1e-6,num_batches_per_epoch=1000,num_epochs=100)
+start_epoch = 0
 if LOAD_CHECK_POINT:
     if not GAN_TRAINING:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optim.load_state_dict(checkpoint['optim_state_dict'])
+        PLOT = checkpoint['plot']
+        start_epoch = checkpoint['epoch']
     else:
         model.load_checkpoint(checkpoint_path)
 def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoint_save_path):
-    for epoch in range(epochs):
+    for epoch in range(start_epoch+1, start_epoch+1+epochs):
         torch.backends.cudnn.benchmark = True
         if not GAN_TRAINING:
             running_loss = {}
@@ -179,7 +183,9 @@ def train(train_dataloader,model,loss_func,optim,epochs,save_each_epoch,checkpoi
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
-                        'optim_state_dict':optim.state_dict()
+                        'optim_state_dict':optim.state_dict(),
+                        'epoch': epoch,
+                        'plot': PLOT
                     },checkpoint_save_path
                  )
         else:
