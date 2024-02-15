@@ -203,8 +203,14 @@ def PLOT_RESULT_GRAPH(PLOT):
         3:'Dice Score'
     }
     for i in range(4):
-        x = int(i%2)
-        y = int((i-x)%2)
+        if i == 0:
+            y, x = 0,0
+        elif i == 1:
+            y, x = 0,1
+        elif i == 2:
+            y, x = 1,0
+        else:
+            y, x = 1,1
         axis[y,x].plot(PLOT['et'][i], linestyle='-', marker='o', color='r', label='ET')
         axis[y,x].plot(PLOT['tc'][i], linestyle='-', marker='o', color='r', label='TC')
         axis[y,x].plot(PLOT['wt'][i], linestyle='-', marker='o', color='r', label='WT')
