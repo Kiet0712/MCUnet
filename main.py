@@ -60,7 +60,7 @@ def train(cfg,device):
                 print('Epoch ' + str(epoch) + ', iter ' + str(i+1) + ':')
                 for key in running_loss:
                     running_loss[key] = running_loss[key]/cfg.SOLVER.PRINT_RESULT_INTERVAL
-                print(pd.DataFrame(running_loss))
+                print(pd.DataFrame([running_loss]).transpose())
                 for key in running_loss:
                     running_loss[key]=0
         scheduler.step()
