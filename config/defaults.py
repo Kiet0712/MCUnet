@@ -8,10 +8,10 @@ from yacs.config import CfgNode as CN
 # ---------------------------------------------------------------------------- #
 _C = CN()
 _C.MODEL = CN()
-_C.MODEL.CRFBNET = True
+_C.MODEL.CRFBNET = False
 _C.MODEL.CRFBNET_DEPTH = 4
-_C.MODEL.MULTIHEAD_OUTPUT = True
-_C.MODEL.SELF_GUIDE_OUTPUT = True
+_C.MODEL.MULTIHEAD_OUTPUT = False
+_C.MODEL.SELF_GUIDE_OUTPUT = False
 _C.MODEL.NORM = 'IN' #IN for instance norm, BN for batch norm
 _C.MODEL.NUM_FEATURES_START_UNET = 32
 _C.MODEL.DOUBLE_CONV_TYPE = 'normal'
@@ -20,7 +20,7 @@ _C.MODEL.OUTPUT_COORDCONV = False
 _C.MODEL.SEPERATE_FEATURE = False
 _C.MODEL.DIALTED_OUTPUT = False
 _C.MODEL.ATTENTION_UP = True
-_C.MODEL.MULTI_PATH_COMBINE = True
+_C.MODEL.MULTI_PATH_COMBINE = False
 _C.MODEL.CRFBNET_KERNEL_SIZE = 3
 _C.MODEL.CRFBNET_PADDING = 1
 # ---------------------------------------------------------------------------- #
