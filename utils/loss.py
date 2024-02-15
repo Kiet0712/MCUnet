@@ -16,9 +16,6 @@ class BCELoss(nn.Module):
         loss = self.bceloss(pred_flat, target_flat)
 
         return loss
-
-#Dice loss
-
 class DiceLoss(nn.Module):
     def __init__(self):
         super(DiceLoss, self).__init__()
@@ -36,7 +33,6 @@ class DiceLoss(nn.Module):
         dice_loss = 1 - dice_score.sum()/size
 
         return dice_loss
-# BCE + Dice  loss
 class BceDiceLoss(nn.Module):
     def __init__(self):
         super(BceDiceLoss, self).__init__()
@@ -49,8 +45,8 @@ class BceDiceLoss(nn.Module):
 
         loss = diceloss + bceloss
 
-        return loss  
-class MHLoss_1(nn.Module):
+        return {'loss':loss}
+class MHLoss_SELF_GUIDE(nn.Module):
     def __init__(self,lamda_list):
         super().__init__()
         self.lamda_list = lamda_list
@@ -67,7 +63,7 @@ class MHLoss_1(nn.Module):
 
 
         #calculate_main_loss
-        segment_volume_loss = self.dicebce(segment_volume,gt_volume)
+        segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
         reconstruct_volume_loss = F.l1_loss(reconstruct_volume,volume)
         class_1_foreground_loss = F.l1_loss(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])
         class_2_foreground_loss = F.l1_loss(class_2_foreground,volume*gt_volume[:,2:,:,:,:])
@@ -119,7 +115,7 @@ class MHLoss_1(nn.Module):
             'class_4_background_guide_loss':class_4_background_guide_loss,
             'class_4_foreground_guide_loss':class_4_foreground_guide_loss
         }
-class MHLoss_2(nn.Module):
+class MHLoss(nn.Module):
     def __init__(self,lamda_list):
         super().__init__()
         self.lamda_list = lamda_list
@@ -136,7 +132,7 @@ class MHLoss_2(nn.Module):
 
 
         #calculate_main_loss
-        segment_volume_loss = self.dicebce(segment_volume,gt_volume)
+        segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
         reconstruct_volume_loss = F.l1_loss(reconstruct_volume,volume)
         class_1_foreground_loss = F.l1_loss(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])
         class_2_foreground_loss = F.l1_loss(class_2_foreground,volume*gt_volume[:,2:,:,:,:])

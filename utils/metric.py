@@ -7,8 +7,6 @@ def calculate_metrics(predict,gt):
     results = []
     for i, label in enumerate(labels):
         if np.sum(gt[i])==0:
-            print('Remove sample')
-            print('Non '  + label)
             return []
         preds_coords = np.argwhere(predict[i])
         targets_coords = np.argwhere(gt[i])

@@ -224,3 +224,16 @@ class BRATS(Dataset):
         item['name']=name
         return item
 
+def make_dataloader(cfg,mode):
+    data = BRATS(
+        csv_dir=cfg.DATASET.CSV_DIR,
+        mode=mode,
+        root_dir=cfg.DATASET.ROOT_DIR
+    )
+    return DataLoader(
+        dataset=data,
+        batch_size=cfg.DATASET.BATCH_SIZE,
+        shuffle=True,
+        num_workers=cfg.DATASET.NUM_WORKERS,
+        pin_memory=cfg.DATASET.PIN_MEMORY
+    )
