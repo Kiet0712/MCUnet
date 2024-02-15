@@ -39,7 +39,7 @@ class BceDiceLoss(nn.Module):
         self.bce = BCELoss()
         self.dice = DiceLoss()
 
-    def forward(self, pred, target):
+    def forward(self, pred, target,something=None):
         bceloss = self.bce(pred,target)
         diceloss = self.dice(pred,target)
 
