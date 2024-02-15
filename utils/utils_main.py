@@ -49,14 +49,14 @@ def make_scheduler(cfg,optimizer):
     if cfg.SOLVER.SCHEDULER == "LambdaLR":
         scheduler = torch.optim.lr_scheduler.LambdaLR(
             optimizer=optimizer,
-            lr_lambda= lambda epoch: 1 if epoch >= 1 and epoch < 5
-                                else 5 if epoch >= 5 and epoch < 10
-                                else 10 if epoch >= 10 and epoch < 20
-                                else 20 if epoch >= 20 and epoch < 25
-                                else 10 if epoch >= 25 and epoch < 30
-                                else 5 if epoch >= 30 and epoch < 40
-                                else 1 if epoch >= 40 and epoch < 80
-                                else 0.1 if epoch >= 80 and epoch < 90
+            lr_lambda= lambda epoch: 1 if epoch >= 0 and epoch < 4
+                                else 5 if epoch >= 4 and epoch < 9
+                                else 10 if epoch >= 9 and epoch < 19
+                                else 20 if epoch >= 19 and epoch < 24
+                                else 10 if epoch >= 24 and epoch < 29
+                                else 5 if epoch >= 29 and epoch < 39
+                                else 1 if epoch >= 39 and epoch < 79
+                                else 0.1 if epoch >= 79 and epoch < 89
                                 else 0.01
         )
         return scheduler

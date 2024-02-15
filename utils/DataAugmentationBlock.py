@@ -36,10 +36,8 @@ class DataAugmenter(nn.Module):
                 if random() < 0.2 and self.channel_shuffling:
                     new_channel_order = sample(range(x.size(1)), x.size(1))
                     x = x[:, new_channel_order]
-                    print("channel shuffling")
                 if random() < 0.2 and self.drop_channel:
                     x[:, sample(range(x.size(1)), 1)] = 0
-                    print("channel Dropping")
                 if self.noise_only:
                     return x,y
                 self.transpose = sample(range(2, x.dim()), 2)
