@@ -181,7 +181,7 @@ def validation_normal(cfg,model,val_dataloader,device):
             result_metrics.append(patient_metrics_result)
     result_metrics = np.array(result_metrics)
     mean_metrics_results = np.mean(result_metrics,axis=0)
-    return result_metrics
+    return mean_metrics_results
 def validation(cfg,model,val_dataloader,device):
     if cfg.VALIDATION_TYPE=='normal':
         return validation_normal(cfg,model,val_dataloader,device)
