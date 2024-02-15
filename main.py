@@ -47,7 +47,7 @@ def train(cfg,device):
                 inputs,label = data_augmentation(inputs,label)
             optim.zero_grad()
             outputs = model(inputs)
-            loss_cal = loss_func(outputs,inputs,label)
+            loss_cal = loss_func(outputs,label,inputs)
             loss_cal['loss'].backward()
             optim.step()
             for key in loss_cal:
