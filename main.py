@@ -59,7 +59,7 @@ def train(cfg,device):
                 print('# ---------------------------------------------------------------------------- #')
                 print('Epoch ' + str(epoch) + ', iter ' + str(i+1) + ':')
                 for key in running_loss:
-                    print(key + ' = ' + str(running_loss[key]/100))
+                    print(key + ' = ' + str(running_loss[key]/cfg.SOLVER.PRINT_RESULT_INTERVAL))
                     running_loss[key]=0
         scheduler.step()
         if epoch%cfg.SOLVER.SAVE_CHECKPOINT_INTERVAL==0:
