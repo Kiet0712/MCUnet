@@ -212,8 +212,8 @@ def PLOT_RESULT_GRAPH(PLOT):
         else:
             y, x = 1,1
         axis[y,x].plot(PLOT['et'][i], linestyle='-', marker='o', color='r', label='ET')
-        axis[y,x].plot(PLOT['tc'][i], linestyle='-', marker='o', color='r', label='TC')
-        axis[y,x].plot(PLOT['wt'][i], linestyle='-', marker='o', color='r', label='WT')
+        axis[y,x].plot(PLOT['tc'][i], linestyle='-', marker='o', color='g', label='TC')
+        axis[y,x].plot(PLOT['wt'][i], linestyle='-', marker='o', color='b', label='WT')
         axis[y,x].set_title(mapping_dict[i])
     plt.legend()
     plt.show()
