@@ -37,6 +37,15 @@ def train(cfg,device):
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         PLOT = checkpoint['plot']
         current_epoch = checkpoint['current_epoch']+1
+        result_plot = np.stack([np.array(PLOT['et']),np.array(PLOT['tc']),np.array(PLOT['wt'])],axis=0)
+        result_plot_mean_by_class = np.mean(result_plot,axis=0)
+        best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
+        best_result = result_plot[:,:,best_epoch_result]
+        print('--------------------------------------------BEST_RESULT--------------------------------------------')
+        print('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------')
+        print(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+        PLOT_RESULT_GRAPH(PLOT)
+        print('Current epoch = ' + str(current_epoch))
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         torch.backends.cudnn.benchmark = True
         running_loss = {}
@@ -64,6 +73,12 @@ def train(cfg,device):
                 for key in running_loss:
                     running_loss[key]=0
         scheduler.step()
+        if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
+            torch.backends.cudnn.benchmark = False
+            result = validation(cfg,model,val_dataloader,device)
+            print(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+            PLOT = update_PLOT(PLOT,result)
+            PLOT_RESULT_GRAPH(PLOT)
         if epoch%cfg.SOLVER.SAVE_CHECKPOINT_INTERVAL==0:
             checkpoint_save_path = 'checkpoint_'+str(epoch)+'.pth'
             torch.save(
@@ -75,12 +90,6 @@ def train(cfg,device):
                     'scheduler_state_dict':scheduler.state_dict()
                 },checkpoint_save_path
             )
-        if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
-            torch.backends.cudnn.benchmark = False
-            result = validation(cfg,model,val_dataloader,device)
-            print(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
-            PLOT = update_PLOT(PLOT,result)
-            PLOT_RESULT_GRAPH(PLOT)
 def main(args):
     #extract dataset
     file = tarfile.open('/kaggle/input/brats-2021-task1/BraTS2021_Training_Data.tar')
