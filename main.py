@@ -68,6 +68,7 @@ def train(cfg,device):
                     running_loss[key]=loss_cal[key].item()
                 else:
                     running_loss[key]+=loss_cal[key].item()
+            string_loss = string_loss[:-2]
             loop.set_postfix_str(s=string_loss)
             if i % cfg.SOLVER.PRINT_RESULT_INTERVAL == 0 and i != 0:
                 print('# ---------------------------------------------------------------------------- #')
