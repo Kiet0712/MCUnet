@@ -36,7 +36,7 @@ def train(cfg,device):
         optim.load_state_dict(checkpoint['optim_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         PLOT = checkpoint['plot']
-        current_epoch = checkpoint['current_epoch']
+        current_epoch = checkpoint['current_epoch']+1
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         torch.backends.cudnn.benchmark = True
         running_loss = {}
