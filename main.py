@@ -49,7 +49,9 @@ def train(cfg,device):
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         torch.backends.cudnn.benchmark = True
         running_loss = {}
-        for i,data in enumerate(tqdm(train_dataloader)):
+        loop = tqdm(enumerate(train_dataloader),total=len(train_dataloader),leave=False)
+        for i,data in loop:
+            loop.set_description(f"Epoch [{epoch}/{cfg.SOLVER.MAX_EPOCHS}]")
             inputs = data['img'].to(device)
             label = data['label'].to(device)
             if cfg.DATASET.AUGMENTATION:
@@ -59,11 +61,14 @@ def train(cfg,device):
             loss_cal = loss_func(outputs,label,inputs)
             loss_cal['loss'].backward()
             optim.step()
+            string_loss = ''
             for key in loss_cal:
+                string_loss+= key + ' = '+ str(loss_cal[key].item()) + ', '
                 if i==0:
                     running_loss[key]=loss_cal[key].item()
                 else:
                     running_loss[key]+=loss_cal[key].item()
+            loop.set_postfix_str(s=string_loss)
             if i % cfg.SOLVER.PRINT_RESULT_INTERVAL == 0 and i != 0:
                 print('# ---------------------------------------------------------------------------- #')
                 print('Epoch ' + str(epoch) + ', iter ' + str(i+1) + ':')
