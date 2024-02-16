@@ -78,6 +78,7 @@ def train(cfg,device):
         if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
             torch.backends.cudnn.benchmark = False
             result = validation(cfg,model,val_dataloader,device)
+            print(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
             PLOT = update_PLOT(PLOT,result)
             PLOT_RESULT_GRAPH(PLOT)
 def main(args):

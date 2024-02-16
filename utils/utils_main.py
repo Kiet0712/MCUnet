@@ -195,7 +195,7 @@ def update_PLOT(PLOT,result):
         PLOT['wt'][i].append(wt[i])
     return PLOT
 def PLOT_RESULT_GRAPH(PLOT):
-    figure, axis = plt.subplots(2, 2)
+    figure, axis = plt.subplots(2, 2,figsize=(10,10))
     mapping_dict = {
         0:'Hausdorff Distance',
         1:'Sensitivity',
