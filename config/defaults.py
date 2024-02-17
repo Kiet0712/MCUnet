@@ -79,3 +79,21 @@ _C.SW_BATCHSIZE = 1
 # LOSS_FUNCTION
 # ---------------------------------------------------------------------------- #
 _C.SELF_GUIDE_LOSS = True
+_C.MULTI_HEAD_LOSS_NAME = [
+    'segment_volume_loss',
+    'reconstruct_volume_loss',
+    'class_1_foreground_loss',
+    'class_2_foreground_loss',
+    'class_4_foreground_loss',
+    'class_1_background_loss',
+    'class_2_background_loss',
+    'class_4_background_loss',
+    'reconstruct_guide_loss',
+    'class_1_background_guide_loss',
+    'class_1_foreground_guide_loss',
+    'class_2_background_guide_loss',
+    'class_2_foreground_guide_loss',
+    'class_4_background_guide_loss',
+    'class_4_foreground_guide_loss'
+]
+_C.MULTI_HEAD_LOSS_WEIGHT = [5,2,2,2,2,2,2,2,0.75,0.75,0.75,0.75,0.75,0.75,0.75]

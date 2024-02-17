@@ -20,7 +20,6 @@ def pad_batch1_to_compatible_size(batch):
     pads = (0, xpad, 0, ypad, 0, zpad)
     batch = F.pad(batch, pads)
     return batch, (zpad, ypad, xpad)
-
 def make_optimizers(cfg,model):
     if cfg.SOLVER.OPTIMIZER=='adam':
         optimizer = torch.optim.Adam(
@@ -77,47 +76,16 @@ def make_scheduler(cfg,optimizer):
         )
         return scheduler
 def make_loss_function(cfg):
+    dict_weight_loss = {}
+    i = 0
+    for loss in cfg.MULTI_HEAD_LOSS_NAME:
+        dict_weight_loss[loss] = cfg.MULTI_HEAD_LOSS_WEIGHT[i]
+        i+=1
     if cfg.MODEL.MULTIHEAD_OUTPUT:
         if cfg.SELF_GUIDE_LOSS:
-            return MHLoss_SELF_GUIDE(
-                    {
-                        'segment_volume_loss':5,
-                        'reconstruct_volume_loss':2,
-                        'class_1_foreground_loss':2,
-                        'class_2_foreground_loss':2,
-                        'class_4_foreground_loss':2,
-                        'class_1_background_loss':2,
-                        'class_2_background_loss':2,
-                        'class_4_background_loss':2,
-                        'reconstruct_guide_loss':0.75,
-                        'class_1_background_guide_loss':0.75,
-                        'class_1_foreground_guide_loss':0.75,
-                        'class_2_background_guide_loss':0.75,
-                        'class_2_foreground_guide_loss':0.75,
-                        'class_4_background_guide_loss':0.75,
-                        'class_4_foreground_guide_loss':0.75
-                    }
-            )
+            return MHLoss_SELF_GUIDE(dict_weight_loss)
         else:
-            return MHLoss(
-                {
-                        'segment_volume_loss':5,
-                        'reconstruct_volume_loss':2,
-                        'class_1_foreground_loss':2,
-                        'class_2_foreground_loss':2,
-                        'class_4_foreground_loss':2,
-                        'class_1_background_loss':2,
-                        'class_2_background_loss':2,
-                        'class_4_background_loss':2,
-                        'reconstruct_guide_loss':0.75,
-                        'class_1_background_guide_loss':0.75,
-                        'class_1_foreground_guide_loss':0.75,
-                        'class_2_background_guide_loss':0.75,
-                        'class_2_foreground_guide_loss':0.75,
-                        'class_4_background_guide_loss':0.75,
-                        'class_4_foreground_guide_loss':0.75
-                }
-            )
+            return MHLoss(dict_weight_loss)
     else:
         return BceDiceLoss()
 def validation_sliding_windown(cfg,model,val_dataloader,device):
