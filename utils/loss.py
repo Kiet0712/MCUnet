@@ -82,38 +82,38 @@ class MHLoss_SELF_GUIDE(nn.Module):
         class_4_background_guide_loss = F.l1_loss(class_4_background,reconstruct_volume*(1-segment_volume[:,0:1,:,:,:]))
         class_4_foreground_guide_loss = F.l1_loss(class_4_foreground,reconstruct_volume*segment_volume[:,0:1,:,:,:])
 
-        loss = self.lamda_list['segment_volume_loss']*segment_volume_loss+\
-               self.lamda_list['reconstruct_volume_loss']*reconstruct_volume_loss+\
-               self.lamda_list['class_1_foreground_loss']*class_1_foreground_loss+\
-               self.lamda_list['class_2_foreground_loss']*class_2_foreground_loss+\
-               self.lamda_list['class_4_foreground_loss']*class_4_foreground_loss+\
-               self.lamda_list['class_1_background_loss']*class_1_background_loss+\
-               self.lamda_list['class_2_background_loss']*class_2_background_loss+\
-               self.lamda_list['class_4_background_loss']*class_4_background_loss+\
-               self.lamda_list['reconstruct_guide_loss']*reconstruct_guide_loss+\
-               self.lamda_list['class_1_background_guide_loss']*class_1_background_guide_loss+\
-               self.lamda_list['class_1_foreground_guide_loss']*class_1_foreground_guide_loss+\
-               self.lamda_list['class_2_background_guide_loss']*class_2_background_guide_loss+\
-               self.lamda_list['class_2_foreground_guide_loss']*class_2_foreground_guide_loss+\
-               self.lamda_list['class_4_background_guide_loss']*class_4_background_guide_loss+\
-               self.lamda_list['class_4_foreground_guide_loss']*class_4_foreground_guide_loss
+        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
+               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
+               self.lamda_list['cls1_fg_loss']*class_1_foreground_loss+\
+               self.lamda_list['cls2_fg_loss']*class_2_foreground_loss+\
+               self.lamda_list['cls4_fg_loss']*class_4_foreground_loss+\
+               self.lamda_list['cls1_bg_loss']*class_1_background_loss+\
+               self.lamda_list['cls2_bg_loss']*class_2_background_loss+\
+               self.lamda_list['cls4_bg_loss']*class_4_background_loss+\
+               self.lamda_list['recstr_guide_loss']*reconstruct_guide_loss+\
+               self.lamda_list['cls1_bg_guide_loss']*class_1_background_guide_loss+\
+               self.lamda_list['cls1_fg_guide_loss']*class_1_foreground_guide_loss+\
+               self.lamda_list['cls2_bg_guide_loss']*class_2_background_guide_loss+\
+               self.lamda_list['cls2_fg_guide_loss']*class_2_foreground_guide_loss+\
+               self.lamda_list['cls4_bg_guide_loss']*class_4_background_guide_loss+\
+               self.lamda_list['cls4_fg_guide_loss']*class_4_foreground_guide_loss
         return {
             'loss': loss,
-            'segment_volume_loss':segment_volume_loss,
-            'reconstruct_volume_loss':reconstruct_volume_loss,
-            'class_1_foreground_loss':class_1_foreground_loss,
-            'class_2_foreground_loss':class_2_foreground_loss,
-            'class_4_foreground_loss':class_4_foreground_loss,
-            'class_1_background_loss':class_1_background_loss,
-            'class_2_background_loss':class_2_background_loss,
-            'class_4_background_loss':class_4_background_loss,
-            'reconstruct_guide_loss':reconstruct_guide_loss,
-            'class_1_background_guide_loss':class_1_background_guide_loss,
-            'class_1_foreground_guide_loss':class_1_foreground_guide_loss,
-            'class_2_background_guide_loss':class_2_background_guide_loss,
-            'class_2_foreground_guide_loss':class_2_foreground_guide_loss,
-            'class_4_background_guide_loss':class_4_background_guide_loss,
-            'class_4_foreground_guide_loss':class_4_foreground_guide_loss
+            'seg_vol_loss':segment_volume_loss,
+            'recstr_vol_loss':reconstruct_volume_loss,
+            'cls1_fg_loss':class_1_foreground_loss,
+            'cls2_fg_loss':class_2_foreground_loss,
+            'cls4_fg_loss':class_4_foreground_loss,
+            'cls1_bg_loss':class_1_background_loss,
+            'cls2_bg_loss':class_2_background_loss,
+            'cls4_bg_loss':class_4_background_loss,
+            'recstr_guide_loss':reconstruct_guide_loss,
+            'cls1_bg_guide_loss':class_1_background_guide_loss,
+            'cls1_fg_guide_loss':class_1_foreground_guide_loss,
+            'cls2_bg_guide_loss':class_2_background_guide_loss,
+            'cls2_fg_guide_loss':class_2_foreground_guide_loss,
+            'cls4_bg_guide_loss':class_4_background_guide_loss,
+            'cls4_fg_guide_loss':class_4_foreground_guide_loss
         }
 class MHLoss(nn.Module):
     def __init__(self,lamda_list):
@@ -141,22 +141,22 @@ class MHLoss(nn.Module):
         class_2_background_loss = F.l1_loss(class_2_background,volume*(1-gt_volume[:,2:,:,:,:]))
         class_4_background_loss = F.l1_loss(class_4_background,volume*(1-gt_volume[:,0:1,:,:,:]))
 
-        loss = self.lamda_list['segment_volume_loss']*segment_volume_loss+\
-               self.lamda_list['reconstruct_volume_loss']*reconstruct_volume_loss+\
-               self.lamda_list['class_1_foreground_loss']*class_1_foreground_loss+\
-               self.lamda_list['class_2_foreground_loss']*class_2_foreground_loss+\
-               self.lamda_list['class_4_foreground_loss']*class_4_foreground_loss+\
-               self.lamda_list['class_1_background_loss']*class_1_background_loss+\
-               self.lamda_list['class_2_background_loss']*class_2_background_loss+\
-               self.lamda_list['class_4_background_loss']*class_4_background_loss
+        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
+               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
+               self.lamda_list['cls1_fg_loss']*class_1_foreground_loss+\
+               self.lamda_list['cls2_fg_loss']*class_2_foreground_loss+\
+               self.lamda_list['cls4_fg_loss']*class_4_foreground_loss+\
+               self.lamda_list['cls1_bg_loss']*class_1_background_loss+\
+               self.lamda_list['cls2_bg_loss']*class_2_background_loss+\
+               self.lamda_list['cls4_bg_loss']*class_4_background_loss
         return {
             'loss': loss,
-            'segment_volume_loss':segment_volume_loss,
-            'reconstruct_volume_loss':reconstruct_volume_loss,
-            'class_1_foreground_loss':class_1_foreground_loss,
-            'class_2_foreground_loss':class_2_foreground_loss,
-            'class_4_foreground_loss':class_4_foreground_loss,
-            'class_1_background_loss':class_1_background_loss,
-            'class_2_background_loss':class_2_background_loss,
-            'class_4_background_loss':class_4_background_loss
+            'seg_vol_loss':segment_volume_loss,
+            'recstr_vol_loss':reconstruct_volume_loss,
+            'cls1_fg_loss':class_1_foreground_loss,
+            'cls2_fg_loss':class_2_foreground_loss,
+            'cls4_fg_loss':class_4_foreground_loss,
+            'cls1_bg_loss':class_1_background_loss,
+            'cls2_bg_loss':class_2_background_loss,
+            'cls4_bg_loss':class_4_background_loss
         }
