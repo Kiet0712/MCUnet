@@ -63,7 +63,10 @@ def train(cfg,device):
             optim.step()
             string_loss = ''
             for key in loss_cal:
-                string_loss+= key[:-5] + f' = {loss_cal[key].item(): .4f}, '
+                if key=='loss':
+                    string_loss+=key + f' = {loss_cal[key].item(): .4f}, '
+                else:
+                    string_loss+= key[:-5] + f' = {loss_cal[key].item(): .4f}, '
                 if i==0:
                     running_loss[key]=loss_cal[key].item()
                 else:
