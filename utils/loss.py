@@ -120,7 +120,7 @@ class MHLoss(nn.Module):
         super().__init__()
         self.lamda_list = lamda_list
         self.dicebce = BceDiceLoss()
-    def forward(self,data,volume,gt_volume):
+    def forward(self,data,gt_volume,volume):
         segment_volume = data['segment_volume']
         reconstruct_volume = data['reconstruct_volume']
         class_1_foreground = data['class_1_foreground']
