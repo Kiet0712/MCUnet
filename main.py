@@ -10,10 +10,10 @@ import torch
 from tqdm.auto import tqdm
 import tarfile
 import pandas as pd
-def myprint(x):
+def myprint(x,log_to_screen = cfg.LOG_TO_SCREEN):
     with open(cfg.LOG_PATH,"a") as f:
         print(x,file = f)
-    if cfg.LOG_TO_SCREEN:
+    if log_to_screen:
         print(x,file = sys.stdout)
 def train(cfg,device):
     train_dataloader = make_dataloader(cfg,"train")
@@ -46,12 +46,12 @@ def train(cfg,device):
         result_plot_mean_by_class = np.mean(result_plot,axis=0)
         best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
         best_result = result_plot[:,:,best_epoch_result]
-        myprint('CHECKPOINT_LOADING FROM ' + str(cfg.CHECKPOINT.PATH))
-        myprint('--------------------------------------------BEST_RESULT--------------------------------------------')
-        myprint('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------')
-        myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+        myprint('CHECKPOINT_LOADING FROM ' + str(cfg.CHECKPOINT.PATH),True)
+        myprint('--------------------------------------------BEST_RESULT--------------------------------------------',True)
+        myprint('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------',True)
+        myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']),True)
         PLOT_RESULT_GRAPH(PLOT)
-        myprint('Current epoch = ' + str(current_epoch))
+        myprint('Current epoch = ' + str(current_epoch),True)
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         torch.backends.cudnn.benchmark = True
         running_loss = {}
@@ -89,6 +89,7 @@ def train(cfg,device):
                     running_loss[key]=0
         scheduler.step()
         if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
+            myprint("--------------------------------VALIDATION EPOCH " + str(epoch) + "--------------------------------",True)
             torch.backends.cudnn.benchmark = False
             result = validation(cfg,model,val_dataloader,device)
             myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
