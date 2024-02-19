@@ -95,7 +95,7 @@ def train(cfg,device):
             myprint("--------------------------------VALIDATION EPOCH " + str(epoch) + "--------------------------------",True)
             torch.backends.cudnn.benchmark = False
             result = validation(cfg,model,val_dataloader,device)
-            myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+            myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']),True)
             PLOT = update_PLOT(PLOT,result)
             if cfg.PLOT_GRAPH_RESULT:
                 PLOT_RESULT_GRAPH(PLOT)
