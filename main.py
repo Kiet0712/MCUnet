@@ -46,6 +46,7 @@ def train(cfg,device):
         result_plot_mean_by_class = np.mean(result_plot,axis=0)
         best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
         best_result = result_plot[:,:,best_epoch_result]
+        myprint('CHECKPOINT_LOADING FROM ' + str(cfg.CHECKPOINT.PATH))
         myprint('--------------------------------------------BEST_RESULT--------------------------------------------')
         myprint('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------')
         myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
