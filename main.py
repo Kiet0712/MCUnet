@@ -10,6 +10,11 @@ import torch
 from tqdm.auto import tqdm
 import tarfile
 import pandas as pd
+def myprint(x):
+    with open(cfg.LOG_PATH,"a") as f:
+        print(x,file = f)
+    if cfg.LOG_TO_SCREEN:
+        print(x,file = sys.stdout)
 def train(cfg,device):
     train_dataloader = make_dataloader(cfg,"train")
     val_dataloader = make_dataloader(cfg,"val")
@@ -41,11 +46,11 @@ def train(cfg,device):
         result_plot_mean_by_class = np.mean(result_plot,axis=0)
         best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
         best_result = result_plot[:,:,best_epoch_result]
-        print('--------------------------------------------BEST_RESULT--------------------------------------------')
-        print('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------')
-        print(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+        myprint('--------------------------------------------BEST_RESULT--------------------------------------------')
+        myprint('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------')
+        myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
         PLOT_RESULT_GRAPH(PLOT)
-        print('Current epoch = ' + str(current_epoch))
+        myprint('Current epoch = ' + str(current_epoch))
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         torch.backends.cudnn.benchmark = True
         running_loss = {}
@@ -74,20 +79,35 @@ def train(cfg,device):
             string_loss = string_loss[:-2]
             loop.set_postfix_str(s=string_loss)
             if i % cfg.SOLVER.PRINT_RESULT_INTERVAL == 0 and i != 0:
-                print('# ---------------------------------------------------------------------------- #')
-                print('Epoch ' + str(epoch) + ', iter ' + str(i+1) + ':')
+                myprint('# ---------------------------------------------------------------------------- #')
+                myprint('Epoch ' + str(epoch) + ', iter ' + str(i+1) + ':')
                 for key in running_loss:
                     running_loss[key] = running_loss[key]/cfg.SOLVER.PRINT_RESULT_INTERVAL
-                print(pd.DataFrame([running_loss]).transpose())
+                myprint(pd.DataFrame([running_loss]).transpose())
                 for key in running_loss:
                     running_loss[key]=0
         scheduler.step()
         if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
             torch.backends.cudnn.benchmark = False
             result = validation(cfg,model,val_dataloader,device)
-            print(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
+            myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']))
             PLOT = update_PLOT(PLOT,result)
-            PLOT_RESULT_GRAPH(PLOT)
+            if cfg.PLOT_GRAPH_RESULT:
+                PLOT_RESULT_GRAPH(PLOT)
+            result_plot = np.stack([np.array(PLOT['et']),np.array(PLOT['tc']),np.array(PLOT['wt'])],axis=0)
+            result_plot_mean_by_class = np.mean(result_plot,axis=0)
+            best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
+            if best_epoch_result==len(PLOT['et'][0])-1:
+                best_checkpoint_save = 'best_checkpoint.pth'
+                torch.save(
+                    {
+                        'model_state_dict':model.state_dict(),
+                        'optim_state_dict':optim.state_dict(),
+                        'current_epoch': epoch,
+                        'plot': PLOT,
+                        'scheduler_state_dict':scheduler.state_dict()
+                    },best_checkpoint_save
+                )
         if epoch%cfg.SOLVER.SAVE_CHECKPOINT_INTERVAL==0:
             checkpoint_save_path = 'checkpoint_'+str(epoch)+'.pth'
             torch.save(
