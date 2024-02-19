@@ -10,6 +10,9 @@ import torch
 from tqdm.auto import tqdm
 import tarfile
 import pandas as pd
+cfg.DATASET.CSV_DIR = ''
+cfg.DATASET.ROOT_DIR = ''
+cfg.LOG_PATH = ''
 def myprint(x,log_to_screen = cfg.LOG_TO_SCREEN):
     with open(cfg.LOG_PATH,"a") as f:
         print(x,file = f)
@@ -121,17 +124,9 @@ def train(cfg,device):
                     'scheduler_state_dict':scheduler.state_dict()
                 },checkpoint_save_path
             )
-def main(args):
-    #extract dataset
-    file = tarfile.open('/kaggle/input/brats-2021-task1/BraTS2021_Training_Data.tar')
+file = tarfile.open('/kaggle/input/brats-2021-task1/BraTS2021_Training_Data.tar')
 
-    file.extractall('./brain_images')
-    file.close()
-    cfg.DATASET.BATCH_SIZE = args.batch_size
-    cfg.DATASET.CSV_DIR = args.fold_split_dataset
-    cfg.DATASET.ROOT_DIR = args.root_dir
-    cfg.CHECKPOINT.PATH = args.checkpoint_path
-    cfg.CHECKPOINT.LOAD = args.load_checkpoint
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train(cfg,device)
-    
+file.extractall('./brain_images')
+file.close()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+train(cfg,device)
