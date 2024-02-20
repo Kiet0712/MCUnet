@@ -72,7 +72,7 @@ def make_scheduler(cfg,optimizer):
     else:
         scheduler = torch.optim.lr_scheduler.ExponentialLR(
             optimizer=optimizer,
-            gamma=0.95
+            gamma=cfg.SOLVER.EXPONENTIAL_LR_SETUP
         )
         return scheduler
 def make_loss_function(cfg):

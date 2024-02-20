@@ -30,6 +30,7 @@ _C.MODEL.CRFBNET_PADDING = 1
 _C.SOLVER = CN()
 _C.SOLVER.OPTIMIZER = "adam" #other choice is adamw, sgd
 _C.SOLVER.SCHEDULER = "LambdaLR" #other choice is OneCycleLR, ExponentialLR
+_C.SOLVER.EXPONENTIAL_LR_SETUP = 0.8
 _C.SOLVER.BASE_LR = 1e-4
 _C.SOLVER.WEIGHT_DECAY = 1e-6
 _C.SOLVER.MAX_EPOCHS = 100
