@@ -104,6 +104,7 @@ def train(cfg,device):
             best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
             if best_epoch_result==len(PLOT['et'][0])-1:
                 best_checkpoint_save = 'best_checkpoint.pth'
+                myprint('NEW BEST RESULT WILL BE SAVE IN ' + best_checkpoint_save,True)
                 torch.save(
                     {
                         'model_state_dict':model.state_dict(),
