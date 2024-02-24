@@ -160,3 +160,117 @@ class MHLoss(nn.Module):
             'c2_bg_loss':class_2_background_loss,
             'c4_bg_loss':class_4_background_loss
         }
+class DiceCEMHLossSelfGuide(nn.Module):
+    def __init__(self,lamda_list):
+        super().__init__()
+        self.lamda_list = lamda_list
+        self.dicebce = BceDiceLoss()
+    def forward(self,data,gt_volume,volume):
+        segment_volume = data['segment_volume']
+        reconstruct_volume = data['reconstruct_volume']
+        class_1_foreground = data['class_1_foreground']
+        class_2_foreground = data['class_2_foreground']
+        class_4_foreground = data['class_4_foreground']
+        class_1_background = data['class_1_background']
+        class_2_background = data['class_2_background']
+        class_4_background = data['class_4_background']
+
+
+        #calculate_main_loss
+        segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
+        reconstruct_volume_loss = self.dicebce(reconstruct_volume,volume)['loss']
+        class_1_foreground_loss = self.dicebce(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])['loss']
+        class_2_foreground_loss = self.dicebce(class_2_foreground,volume*gt_volume[:,2:,:,:,:])['loss']
+        class_4_foreground_loss = self.dicebce(class_4_foreground,volume*gt_volume[:,0:1,:,:,:])['loss']
+        class_1_background_loss = self.dicebce(class_1_background,volume*(1-gt_volume[:,1:2,:,:,:]))['loss']
+        class_2_background_loss = self.dicebce(class_2_background,volume*(1-gt_volume[:,2:,:,:,:]))['loss']
+        class_4_background_loss = self.dicebce(class_4_background,volume*(1-gt_volume[:,0:1,:,:,:]))['loss']
+        #calculate_guide_loss
+        reconstruct_guide_loss = self.dicebce(reconstruct_volume,class_1_background+class_1_foreground)['loss']+\
+                                 self.dicebce(reconstruct_volume,class_2_background+class_2_foreground)['loss']+\
+                                 self.dicebce(reconstruct_volume,class_4_background+class_4_foreground)['loss']
+        class_1_background_guide_loss = self.dicebce(class_1_background,reconstruct_volume*(1-segment_volume[:,1:2,:,:,:]))['loss']
+        class_1_foreground_guide_loss = self.dicebce(class_1_foreground,reconstruct_volume*segment_volume[:,1:2,:,:,:])['loss']
+        class_2_background_guide_loss = self.dicebce(class_2_background,reconstruct_volume*(1-segment_volume[:,2:,:,:,:]))['loss']
+        class_2_foreground_guide_loss = self.dicebce(class_2_foreground,reconstruct_volume*segment_volume[:,2:,:,:,:])['loss']
+        class_4_background_guide_loss = self.dicebce(class_4_background,reconstruct_volume*(1-segment_volume[:,0:1,:,:,:]))['loss']
+        class_4_foreground_guide_loss = self.dicebce(class_4_foreground,reconstruct_volume*segment_volume[:,0:1,:,:,:])['loss']
+
+        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
+               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
+               self.lamda_list['c1_fg_loss']*class_1_foreground_loss+\
+               self.lamda_list['c2_fg_loss']*class_2_foreground_loss+\
+               self.lamda_list['c4_fg_loss']*class_4_foreground_loss+\
+               self.lamda_list['c1_bg_loss']*class_1_background_loss+\
+               self.lamda_list['c2_bg_loss']*class_2_background_loss+\
+               self.lamda_list['c4_bg_loss']*class_4_background_loss+\
+               self.lamda_list['recstr_guide_loss']*reconstruct_guide_loss+\
+               self.lamda_list['c1_bg_guide_loss']*class_1_background_guide_loss+\
+               self.lamda_list['c1_fg_guide_loss']*class_1_foreground_guide_loss+\
+               self.lamda_list['c2_bg_guide_loss']*class_2_background_guide_loss+\
+               self.lamda_list['c2_fg_guide_loss']*class_2_foreground_guide_loss+\
+               self.lamda_list['c4_bg_guide_loss']*class_4_background_guide_loss+\
+               self.lamda_list['c4_fg_guide_loss']*class_4_foreground_guide_loss
+        return {
+            'loss': loss,
+            'seg_vol_loss':segment_volume_loss,
+            'recstr_vol_loss':reconstruct_volume_loss,
+            'c1_fg_loss':class_1_foreground_loss,
+            'c2_fg_loss':class_2_foreground_loss,
+            'c4_fg_loss':class_4_foreground_loss,
+            'c1_bg_loss':class_1_background_loss,
+            'c2_bg_loss':class_2_background_loss,
+            'c4_bg_loss':class_4_background_loss,
+            'recstr_guide_loss':reconstruct_guide_loss,
+            'c1_bg_guide_loss':class_1_background_guide_loss,
+            'c1_fg_guide_loss':class_1_foreground_guide_loss,
+            'c2_bg_guide_loss':class_2_background_guide_loss,
+            'c2_fg_guide_loss':class_2_foreground_guide_loss,
+            'c4_bg_guide_loss':class_4_background_guide_loss,
+            'c4_fg_guide_loss':class_4_foreground_guide_loss
+        }
+class DiceCEMHLoss(nn.Module):
+    def __init__(self,lamda_list):
+        super().__init__()
+        self.lamda_list = lamda_list
+        self.dicebce = BceDiceLoss()
+    def forward(self,data,gt_volume,volume):
+        segment_volume = data['segment_volume']
+        reconstruct_volume = data['reconstruct_volume']
+        class_1_foreground = data['class_1_foreground']
+        class_2_foreground = data['class_2_foreground']
+        class_4_foreground = data['class_4_foreground']
+        class_1_background = data['class_1_background']
+        class_2_background = data['class_2_background']
+        class_4_background = data['class_4_background']
+
+
+        #calculate_main_loss
+        segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
+        reconstruct_volume_loss = self.dicebce(reconstruct_volume,volume)['loss']
+        class_1_foreground_loss = self.dicebce(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])['loss']
+        class_2_foreground_loss = self.dicebce(class_2_foreground,volume*gt_volume[:,2:,:,:,:])['loss']
+        class_4_foreground_loss = self.dicebce(class_4_foreground,volume*gt_volume[:,0:1,:,:,:])['loss']
+        class_1_background_loss = self.dicebce(class_1_background,volume*(1-gt_volume[:,1:2,:,:,:]))['loss']
+        class_2_background_loss = self.dicebce(class_2_background,volume*(1-gt_volume[:,2:,:,:,:]))['loss']
+        class_4_background_loss = self.dicebce(class_4_background,volume*(1-gt_volume[:,0:1,:,:,:]))['loss']
+
+        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
+               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
+               self.lamda_list['c1_fg_loss']*class_1_foreground_loss+\
+               self.lamda_list['c2_fg_loss']*class_2_foreground_loss+\
+               self.lamda_list['c4_fg_loss']*class_4_foreground_loss+\
+               self.lamda_list['c1_bg_loss']*class_1_background_loss+\
+               self.lamda_list['c2_bg_loss']*class_2_background_loss+\
+               self.lamda_list['c4_bg_loss']*class_4_background_loss
+        return {
+            'loss': loss,
+            'seg_vol_loss':segment_volume_loss,
+            'recstr_vol_loss':reconstruct_volume_loss,
+            'c1_fg_loss':class_1_foreground_loss,
+            'c2_fg_loss':class_2_foreground_loss,
+            'c4_fg_loss':class_4_foreground_loss,
+            'c1_bg_loss':class_1_background_loss,
+            'c2_bg_loss':class_2_background_loss,
+            'c4_bg_loss':class_4_background_loss
+        }

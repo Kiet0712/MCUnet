@@ -4,7 +4,7 @@ import numpy as np
 from tqdm.auto import tqdm
 import torch.nn.functional as F
 from metric import calculate_metrics
-from loss import MHLoss,MHLoss_SELF_GUIDE,BceDiceLoss
+from loss import MHLoss,MHLoss_SELF_GUIDE,BceDiceLoss,DiceCEMHLoss,DiceCEMHLossSelfGuide
 import matplotlib.pyplot as plt
 def pad_batch1_to_compatible_size(batch):
     shape = batch.shape
@@ -83,9 +83,15 @@ def make_loss_function(cfg):
         i+=1
     if cfg.MODEL.MULTIHEAD_OUTPUT:
         if cfg.SELF_GUIDE_LOSS:
-            return MHLoss_SELF_GUIDE(dict_weight_loss)
+            if cfg.DICE_CE_MH:
+                return DiceCEMHLossSelfGuide(dict_weight_loss)
+            else:
+                return MHLoss_SELF_GUIDE(dict_weight_loss)
         else:
-            return MHLoss(dict_weight_loss)
+            if cfg.DICE_CE_MH:
+                return DiceCEMHLoss(DiceCEMHLoss)
+            else:
+                return MHLoss(dict_weight_loss)
     else:
         return BceDiceLoss()
 def validation_sliding_windown(cfg,model,val_dataloader,device):
