@@ -23,12 +23,6 @@ _C.MODEL.ATTENTION_UP = True
 _C.MODEL.MULTI_PATH_COMBINE = False
 _C.MODEL.CRFBNET_KERNEL_SIZE = 3
 _C.MODEL.CRFBNET_PADDING = 1
-_C.MODEL.VIT_OUTPUT = False
-_C.MODEL.VIT_HEAD = 8
-_C.MODEL.VIT_DMODEL = 1024
-_C.MODEL.VIT_DIM_HEAD = 64
-_C.MODEL.VIT_DROPOUT = 0.1
-_C.MODEL.VIT_FFN_DIM = 512
 # ---------------------------------------------------------------------------- #
 # SOLVER
 # ---------------------------------------------------------------------------- #
