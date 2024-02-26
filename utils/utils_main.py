@@ -89,7 +89,7 @@ def make_loss_function(cfg):
                 return MHLoss_SELF_GUIDE(dict_weight_loss)
         else:
             if cfg.DICE_CE_MH:
-                return DiceCEMHLoss(DiceCEMHLoss)
+                return DiceCEMHLoss(dict_weight_loss)
             else:
                 return MHLoss(dict_weight_loss)
     else:
