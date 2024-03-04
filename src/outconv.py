@@ -32,7 +32,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,n_channels,kernel_size=1,padding=1//2,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.mask_head_conv = nn.Sequential(
                             conv(in_channels+n_channels,in_channels,kernel_size=3,padding=2,dilation=2,bias=False),
@@ -42,7 +42,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,out_channels*n_channels*2,kernel_size=1,padding=1//2,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.segment_volume_conv_featrue = nn.Sequential(
                             conv(in_channels,in_channels,kernel_size=3,padding=2,dilation=2,bias=False),
@@ -77,7 +77,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,n_channels,kernel_size=1,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.mask_head_conv = nn.Sequential(
                             conv(in_channels+n_channels,in_channels,3,1,1,bias=False),
@@ -87,7 +87,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,out_channels*n_channels*2,kernel_size=1,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.segment_volume_conv_featrue = nn.Sequential(
                             conv(in_channels,in_channels,3,1,1,bias=False),
@@ -123,7 +123,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,n_channels,kernel_size=1,padding=1//2,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.mask_head_conv = nn.Sequential(
                             conv(in_channels,in_channels,kernel_size=3,padding=2,dilation=2,bias=False),
@@ -133,7 +133,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,out_channels*n_channels*2,kernel_size=1,padding=1//2,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.segment_volume_conv = nn.Sequential(
                             conv(in_channels,in_channels,kernel_size=3,padding=2,dilation=2,bias=False),
@@ -154,7 +154,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,n_channels,kernel_size=1,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.mask_head_conv = nn.Sequential(
                             conv(in_channels,in_channels,3,1,1,bias=False),
@@ -164,7 +164,7 @@ class OutConv(nn.Module):
                             norm(in_channels),
                             nn.ReLU(inplace=True),
                             conv(in_channels,out_channels*n_channels*2,kernel_size=1,bias=True),
-                            nn.Sigmoid()
+                            nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                         )
                         self.segment_volume_conv = nn.Sequential(
                             conv(in_channels,in_channels,3,1,1,bias=False),
@@ -180,11 +180,11 @@ class OutConv(nn.Module):
                 if cfg.MODEL.SELF_GUIDE_OUTPUT:
                     self.reconstruct_volume_conv = nn.Sequential(
                         conv(in_channels,n_channels,kernel_size=1),
-                        nn.Sigmoid()
+                        nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                     )
                     self.mask_head = nn.Sequential(
                         conv(in_channels+n_channels,out_channels*n_channels*2,kernel_size=1),
-                        nn.Sigmoid()
+                        nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                     )
                     self.class_1_segment_conv = nn.Sequential(
                         conv(in_channels+n_channels*2,out_channels//3,kernel_size=1),
@@ -205,11 +205,11 @@ class OutConv(nn.Module):
                 else:
                     self.reconstruct_volume_conv = nn.Sequential(
                         nn.Conv3d(in_channels,n_channels,kernel_size=1),
-                        nn.Sigmoid()
+                        nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                     )
                     self.mask_head = nn.Sequential(
                         nn.Conv3d(in_channels,out_channels*n_channels*2,kernel_size=1),
-                        nn.Sigmoid()
+                        nn.Sigmoid() if cfg.MODEL.SELF_GUIDE_OUTPUT_SIGMOID else nn.Identity()
                     )
                     self.segment_conv = nn.Sequential(
                         nn.Conv3d(in_channels,out_channels,kernel_size=1),

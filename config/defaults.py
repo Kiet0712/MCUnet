@@ -23,6 +23,7 @@ _C.MODEL.ATTENTION_UP = True
 _C.MODEL.MULTI_PATH_COMBINE = False
 _C.MODEL.CRFBNET_KERNEL_SIZE = 3
 _C.MODEL.CRFBNET_PADDING = 1
+_C.MODEL.SELF_GUIDE_OUTPUT_SIGMOID = True
 # ---------------------------------------------------------------------------- #
 # SOLVER
 # ---------------------------------------------------------------------------- #
