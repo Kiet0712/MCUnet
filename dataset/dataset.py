@@ -194,7 +194,7 @@ def val_transformation(dataset):
         'label':torch.from_numpy(patient_label),
         'crop_indices': ((zmin,zmax),(ymin,ymax),(xmin,xmax))
     }
-class BRATS(Dataset):
+class BRATS2021(Dataset):
     def __init__(self, csv_dir,mode,root_dir='/kaggle/working/brain_images'):
         self.root_dir = root_dir
         self.transform = None
@@ -224,8 +224,13 @@ class BRATS(Dataset):
         item['name']=name
         return item
 
+dataset_zoo = {
+    'BRATS2021':BRATS2021,
+    'BRATS2023':BRATS2023
+}
 def make_dataloader(cfg,mode):
-    data = BRATS(
+    dataset = dataset_zoo[cfg.DATASET.NAME]
+    data = dataset(
         csv_dir=cfg.DATASET.CSV_DIR,
         mode=mode,
         root_dir=cfg.DATASET.ROOT_DIR

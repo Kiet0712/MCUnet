@@ -59,7 +59,7 @@ _C.DATASET.AUGMENTATION_PROBA = 0.8
 _C.DATASET.AUGMENTATION_NOISE_ONLY = False
 _C.DATASET.AUGMENTATION_CHANNEL_SHUFFLE = False
 _C.DATASET.AUGMENTATION_DROP_CHANNEL = True
-
+_C.DATASET.NAME = 'BRATS2021'
 
 # ---------------------------------------------------------------------------- #
 # CHECKPOINT
