@@ -2,7 +2,7 @@ import sys
 path_code = ''
 sys.path.append(path_code)
 from config.defaults import _C as cfg
-from dataset.dataset import make_dataloader
+from dataset.dataset import make_dataloader,csv_to_list,datafold_readSWINUNETR
 from utils.DataAugmentationBlock import DataAugmenter
 from src.model_main import make_model
 from utils.utils_main import *
@@ -19,8 +19,13 @@ def myprint(x,log_to_screen = cfg.LOG_TO_SCREEN):
     if log_to_screen:
         print(x,file = sys.stdout)
 def train(cfg,device):
-    train_dataloader = make_dataloader(cfg,"train")
-    val_dataloader = make_dataloader(cfg,"val")
+    if cfg.DATASET.SWINUNETR_SPLIT:
+        train_name_list,val_name_list = datafold_readSWINUNETR(cfg.DATASET.SPLIT_DIR,'',cfg.DATASET.FOLD)
+    else:
+        train_name_list = csv_to_list(cfg.DATASET.SPLIT_DIR,'train')
+        val_name_list = csv_to_list(cfg.DATASET.SPLIT_DIR,'val')
+    train_dataloader = make_dataloader(cfg,"train",train_name_list)
+    val_dataloader = make_dataloader(cfg,"val",val_name_list)
     if cfg.DATASET.AUGMENTATION:
         data_augmentation = DataAugmenter(
             p=cfg.DATASET.AUGMENTATION_PROBA,

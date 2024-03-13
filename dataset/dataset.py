@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import random
-
+import json
 def pad_or_crop_image(image, seg=None, target_size=(128, 128, 128)):
     c, z, y, x = image.shape
     z_slice, y_slice, x_slice = [get_crop_slice(target, dim) for target, dim in zip(target_size, (z, y, x))]
@@ -150,6 +150,28 @@ def csv_to_list(csv_file_path,mode):
             if row[1] == mode:
                 extracted_info.append(row[0])
     return extracted_info
+def datafold_readSWINUNETR(datalist, basedir, fold=0, key="training"):
+    with open(datalist) as f:
+        json_data = json.load(f)
+
+    json_data = json_data[key]
+
+    for d in json_data:
+        for k, v in d.items():
+            if isinstance(d[k], list):
+                d[k] = [os.path.join(basedir, iv) for iv in d[k]]
+            elif isinstance(d[k], str):
+                d[k] = os.path.join(basedir, d[k]) if len(d[k]) > 0 else d[k]
+
+    tr = []
+    val = []
+    for d in json_data:
+        if "fold" in d and d["fold"] == fold:
+            val.append(d['label'][13:28])
+        else:
+            tr.append(d['label'][13:28])
+
+    return tr, val
 def train_transformation(dataset):
     for key in dataset:
         if key!='label':
@@ -195,14 +217,14 @@ def val_transformation(dataset):
         'crop_indices': ((zmin,zmax),(ymin,ymax),(xmin,xmax))
     }
 class BRATS2021(Dataset):
-    def __init__(self, csv_dir,mode,root_dir='/kaggle/working/brain_images'):
+    def __init__(self, file_list,mode,root_dir='/kaggle/working/brain_images'):
         self.root_dir = root_dir
         self.transform = None
         if mode == 'train':
             self.transform = train_transformation
         else:
             self.transform = val_transformation
-        self.file_list = csv_to_list(csv_dir,mode)
+        self.file_list = file_list
         self.mode = mode
     def __len__(self):
         return len(self.file_list)
@@ -227,10 +249,11 @@ class BRATS2021(Dataset):
 dataset_zoo = {
     'BRATS2021':BRATS2021
 }
-def make_dataloader(cfg,mode):
+def make_dataloader(cfg,mode,name):
     dataset = dataset_zoo[cfg.DATASET.NAME]
     data = dataset(
-        csv_dir=cfg.DATASET.CSV_DIR,
+        file_list=name,
+        
         mode=mode,
         root_dir=cfg.DATASET.ROOT_DIR
     )

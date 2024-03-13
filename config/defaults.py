@@ -49,7 +49,8 @@ _C.SOLVER.PRINT_RESULT_INTERVAL = 100
 # DATASET
 # ---------------------------------------------------------------------------- #
 _C.DATASET = CN()
-_C.DATASET.CSV_DIR = ''
+_C.DATASET.SPLIT_DIR = ''
+_C.DATASET.FOLD = 0
 _C.DATASET.ROOT_DIR = ''
 _C.DATASET.NUM_WORKERS = 4
 _C.DATASET.PIN_MEMORY = True
@@ -60,7 +61,7 @@ _C.DATASET.AUGMENTATION_NOISE_ONLY = False
 _C.DATASET.AUGMENTATION_CHANNEL_SHUFFLE = False
 _C.DATASET.AUGMENTATION_DROP_CHANNEL = True
 _C.DATASET.NAME = 'BRATS2021'
-
+_C.DATASET.SWINUNETR_SPLIT = False
 # ---------------------------------------------------------------------------- #
 # CHECKPOINT
 # ---------------------------------------------------------------------------- #
