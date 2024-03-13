@@ -10,7 +10,7 @@ import torch
 from tqdm.auto import tqdm
 import tarfile
 import pandas as pd
-cfg.DATASET.CSV_DIR = ''
+cfg.DATASET.SPLIT_DIR = ''
 cfg.DATASET.ROOT_DIR = ''
 cfg.LOG_PATH = ''
 def myprint(x,log_to_screen = cfg.LOG_TO_SCREEN):
