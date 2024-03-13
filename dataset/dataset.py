@@ -225,8 +225,7 @@ class BRATS2021(Dataset):
         return item
 
 dataset_zoo = {
-    'BRATS2021':BRATS2021,
-    'BRATS2023':BRATS2023
+    'BRATS2021':BRATS2021
 }
 def make_dataloader(cfg,mode):
     dataset = dataset_zoo[cfg.DATASET.NAME]
