@@ -1,0 +1,11 @@
+yacs
+monai
+numpy
+itkwidgets
+matplotlib
+nibabel
+torch
+torchvision
+csv
+jsons
+python-csv
