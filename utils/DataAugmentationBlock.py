@@ -1,7 +1,4 @@
-"""The strange way used to perform data augmentation during the Brats 2020 challenge...
 
-Be aware, any batch size above 1 could fail miserably (in an unpredicted way).
-"""
 
 from random import randint, random, sample, uniform
 
