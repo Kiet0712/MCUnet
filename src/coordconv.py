@@ -179,3 +179,19 @@ class CoordConv3d(conv.Conv3d):
         out = self.conv(out)
 
         return out
+class TransposeCoordConv3d(conv.ConvTranspose3d):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+                 padding=0, dilation=1, groups=1, bias=True, with_r=False, use_cuda=True):
+        super(TransposeCoordConv3d, self).__init__(in_channels, out_channels, kernel_size,
+                                          stride, padding, dilation, groups, bias)
+        self.rank = 3
+        self.addcoords = AddCoords(self.rank, with_r, use_cuda=use_cuda)
+        self.conv = nn.ConvTranspose3d(in_channels + self.rank + int(with_r), out_channels,
+                              kernel_size, stride, padding, dilation, groups, bias)
+
+    def forward(self, input_tensor):
+
+        out = self.addcoords(input_tensor)
+        out = self.conv(out)
+
+        return out

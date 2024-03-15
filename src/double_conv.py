@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from coordconv import CoordConv3d
 
 
 class DoubleConv(nn.Module):
@@ -9,8 +9,10 @@ class DoubleConv(nn.Module):
         super().__init__()
         if not mid_channels:
             mid_channels = out_channels
-        if cfg.MODEL.DOUBLE_CONV_TYPE == 'normal':
+        if cfg.MODEL.CONV_TYPE == 'normal':
             conv_type = nn.Conv3d
+        elif cfg.MODEL.CONV_TYPE == 'coord':
+            conv_type = CoordConv3d
         if cfg.MODEL.NORM == 'IN':
             norm_type = nn.InstanceNorm3d
         elif cfg.MODEL.NORM == 'BN':

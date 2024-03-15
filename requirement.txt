@@ -8,4 +8,5 @@ torch
 torchvision
 csv
 jsons
-python-csv
+tqdm
+pandas

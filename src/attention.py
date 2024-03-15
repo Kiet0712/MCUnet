@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from coordconv import CoordConv3d
 class Attention_block(nn.Module):
     def __init__(self,cfg,F_g,F_l,F_int):
         super().__init__()
@@ -9,16 +9,20 @@ class Attention_block(nn.Module):
             norm_type = nn.InstanceNorm3d
         elif cfg.MODEL.NORM == 'BN':
             norm_type = nn.BatchNorm3d
+        if cfg.MODEL.CONV_TYPE == 'normal':
+            conv_type = nn.Conv3d
+        elif cfg.MODEL.CONV_TYPE == 'coord':
+            conv_type = CoordConv3d
         self.W_g = nn.Sequential(
-            nn.Conv3d(F_g,F_int,1,bias=False),
+            conv_type(F_g,F_int,1,bias=False),
             norm_type(F_int)
         )
         self.W_x = nn.Sequential(
-            nn.Conv3d(F_l,F_int,1,bias=False),
+            conv_type(F_l,F_int,1,bias=False),
             norm_type(F_int)
         )
         self.psi = nn.Sequential(
-            nn.Conv3d(F_int,1,1,bias=False),
+            conv_type(F_int,1,1,bias=False),
             norm_type(1),
             nn.Sigmoid()
         )

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from CRFB_block import CRFB
-
+from coordconv import CoordConv3d
 
 class CRFBNet(nn.Module):
     def __init__(self,cfg,num_feature_start,depth):
@@ -13,6 +13,10 @@ class CRFBNet(nn.Module):
             norm = nn.InstanceNorm3d
         else:
             norm = nn.BatchNorm3d
+        if cfg.MODEL.CONV_TYPE == 'normal':
+            conv_type = nn.Conv3d
+        elif cfg.MODEL.CONV_TYPE == 'coord':
+            conv_type = CoordConv3d
         mapping_depth_channel = {
             0: num_feature_start,
             1: num_feature_start*2,
@@ -25,7 +29,7 @@ class CRFBNet(nn.Module):
                 if j == 0:
                     feature_list_i.append(
                         nn.Sequential(
-                            nn.Conv3d(mapping_depth_channel[i],mapping_depth_channel[i]//4,kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
+                            conv_type(mapping_depth_channel[i],mapping_depth_channel[i]//4,kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
                             norm(mapping_depth_channel[i]//4),
                             nn.ReLU(inplace=True)
                         )
@@ -33,7 +37,7 @@ class CRFBNet(nn.Module):
                 elif j == depth-1:
                     feature_list_i.append(
                         nn.Sequential(
-                            nn.Conv3d(mapping_depth_channel[i]//4,mapping_depth_channel[i],kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
+                            conv_type(mapping_depth_channel[i]//4,mapping_depth_channel[i],kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
                             norm(mapping_depth_channel[i]),
                             nn.ReLU(inplace=True)
                         )
@@ -41,7 +45,7 @@ class CRFBNet(nn.Module):
                 else:
                     feature_list_i.append(
                         nn.Sequential(
-                            nn.Conv3d(mapping_depth_channel[i]//4,mapping_depth_channel[i]//4,kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
+                            conv_type(mapping_depth_channel[i]//4,mapping_depth_channel[i]//4,kernel_size=cfg.MODEL.CRFBNET_KERNEL_SIZE,padding=cfg.MODEL.CRFBNET_PADDING,bias=False),
                             norm(mapping_depth_channel[i]//4),
                             nn.ReLU(inplace=True)
                         )
