@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from coordconv import CoordConv3d
+from coordconv import CoordConv3d,TransposeCoordConv3d,CoordConv2d,TransposeCoordConv2d
 from attention import Attention_block
 
 
@@ -11,14 +11,26 @@ class OutConv(nn.Module):
         self.MULTIHEAD_OUTPUT = cfg.MODEL.MULTIHEAD_OUTPUT
         self.OUTPUT_COORDCONV = cfg.MODEL.OUTPUT_COORDCONV
         self.SELF_GUIDE_OUTPUT = cfg.MODEL.SELF_GUIDE_OUTPUT
-        if cfg.MODEL.OUTPUT_COORDCONV:
-            conv = CoordConv3d
-        else:
-            conv = nn.Conv3d
-        if cfg.MODEL.NORM=='IN':
+        if cfg.MODEL.NORM=='IN3d':
             norm = nn.InstanceNorm3d
-        else:
+        elif cfg.MODEL.NORM == 'BN3d':
             norm = nn.BatchNorm3d
+        elif cfg.MODEL.NORM=='IN2d':
+            norm = nn.InstanceNorm2d
+        elif cfg.MODEL.NORM == 'BN2d':
+            norm = nn.BatchNorm2d
+        if cfg.MODEL.CONV_TYPE == 'normal3d':
+            conv = nn.Conv3d
+            conv_transpose = nn.ConvTranspose3d
+        elif cfg.MODEL.CONV_TYPE == 'coord3d':
+            conv = CoordConv3d
+            conv_transpose = TransposeCoordConv3d
+        elif cfg.MODEL.CONV_TYPE == 'normal2d':
+            conv = nn.Conv2d
+            conv_transpose = nn.ConvTranspose2d
+        elif cfg.MODEL.CONV_TYPE == 'coord2d':
+            conv = CoordConv2d
+            conv_transpose = TransposeCoordConv2d
         if cfg.MODEL.MULTIHEAD_OUTPUT:
             if cfg.MODEL.SELF_GUIDE_OUTPUT:
                 self.reconstruct_volume_conv = nn.Sequential(

@@ -2,21 +2,33 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from CRFB_block import CRFB
-from coordconv import CoordConv3d
+from coordconv import CoordConv3d,TransposeCoordConv3d,CoordConv2d,TransposeCoordConv2d
 
 class CRFBNet(nn.Module):
     def __init__(self,cfg,num_feature_start,depth):
         super().__init__()
         self.depth = depth
         self.feature_list = nn.ModuleList()
-        if cfg.MODEL.NORM=='IN':
+        if cfg.MODEL.NORM=='IN3d':
             norm = nn.InstanceNorm3d
-        else:
+        elif cfg.MODEL.NORM == 'BN3d':
             norm = nn.BatchNorm3d
-        if cfg.MODEL.CONV_TYPE == 'normal':
+        elif cfg.MODEL.NORM=='IN2d':
+            norm = nn.InstanceNorm2d
+        elif cfg.MODEL.NORM == 'BN2d':
+            norm = nn.BatchNorm2d
+        if cfg.MODEL.CONV_TYPE == 'normal3d':
             conv_type = nn.Conv3d
-        elif cfg.MODEL.CONV_TYPE == 'coord':
+            conv_transpose = nn.ConvTranspose3d
+        elif cfg.MODEL.CONV_TYPE == 'coord3d':
             conv_type = CoordConv3d
+            conv_transpose = TransposeCoordConv3d
+        elif cfg.MODEL.CONV_TYPE == 'normal2d':
+            conv_type = nn.Conv2d
+            conv_transpose = nn.ConvTranspose2d
+        elif cfg.MODEL.CONV_TYPE == 'coord2d':
+            conv_type = CoordConv2d
+            conv_transpose = TransposeCoordConv2d
         mapping_depth_channel = {
             0: num_feature_start,
             1: num_feature_start*2,

@@ -157,7 +157,26 @@ class CoordConv2d(conv.Conv2d):
         out = self.conv(out)
 
         return out
+class TransposeCoordConv2d(conv.ConvTranspose2d):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+                 padding=0, dilation=1, groups=1, bias=True, with_r=False, use_cuda=True):
+        super(TransposeCoordConv2d, self).__init__(in_channels, out_channels, kernel_size,
+                                          stride, padding, dilation, groups, bias)
+        self.rank = 2
+        self.addcoords = AddCoords(self.rank, with_r, use_cuda=use_cuda)
+        self.conv = nn.ConvTranspose2d(in_channels + self.rank + int(with_r), out_channels,
+                              kernel_size, stride, padding, dilation, groups, bias)
 
+    def forward(self, input_tensor):
+        """
+        input_tensor_shape: (N, C_in,H,W)
+        output_tensor_shape: N,C_out,H_out,W_out）
+        :return: CoordConv2d Result
+        """
+        out = self.addcoords(input_tensor)
+        out = self.conv(out)
+
+        return out
 
 class CoordConv3d(conv.Conv3d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,

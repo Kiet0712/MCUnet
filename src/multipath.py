@@ -1,22 +1,32 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from coordconv import CoordConv3d,TransposeCoordConv3d
+from coordconv import CoordConv3d,TransposeCoordConv3d,CoordConv2d,TransposeCoordConv2d
 
 
 class MultiPath(nn.Module):
     def __init__(self,cfg,num_feature_aim):
         super().__init__()
-        if cfg.MODEL.NORM=='IN':
+        if cfg.MODEL.NORM=='IN3d':
             norm = nn.InstanceNorm3d
-        else:
+        elif cfg.MODEL.NORM == 'BN3d':
             norm = nn.BatchNorm3d
-        if cfg.MODEL.CONV_TYPE == 'normal':
+        elif cfg.MODEL.NORM=='IN2d':
+            norm = nn.InstanceNorm2d
+        elif cfg.MODEL.NORM == 'BN2d':
+            norm = nn.BatchNorm2d
+        if cfg.MODEL.CONV_TYPE == 'normal3d':
             conv_type = nn.Conv3d
             conv_transpose = nn.ConvTranspose3d
-        elif cfg.MODEL.CONV_TYPE == 'coord':
+        elif cfg.MODEL.CONV_TYPE == 'coord3d':
             conv_type = CoordConv3d
             conv_transpose = TransposeCoordConv3d
+        elif cfg.MODEL.CONV_TYPE == 'normal2d':
+            conv_type = nn.Conv2d
+            conv_transpose = nn.ConvTranspose2d
+        elif cfg.MODEL.CONV_TYPE == 'coord2d':
+            conv_type = CoordConv2d
+            conv_transpose = TransposeCoordConv2d
         num_feature_start = cfg.MODEL.NUM_FEATURES_START_UNET
         num_feature_list = [num_feature_start*(2**i) for i in range(4)]
         if num_feature_aim==num_feature_list[3]:
