@@ -2,10 +2,10 @@ import sys
 path_code = ''
 sys.path.append(path_code)
 from config.defaults import _C as cfg
-from dataset.dataset import make_dataloader,csv_to_list,datafold_readSWINUNETR
-from utils.DataAugmentationBlock import DataAugmenter
+from dataset.BRATS.dataset import make_dataloader,csv_to_list,datafold_readSWINUNETR
+from utils.BRATS.DataAugmentationBlock import DataAugmenter
 from src.model_main import make_model
-from utils.utils_main import *
+from utils.BRATS.utils_main import *
 import torch
 from tqdm.auto import tqdm
 import tarfile

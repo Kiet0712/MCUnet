@@ -249,7 +249,7 @@ class BRATS2021(Dataset):
 dataset_zoo = {
     'BRATS2021':BRATS2021
 }
-def BRATS_make_dataloader(cfg,mode,name):
+def make_dataloader(cfg,mode,name):
     dataset = dataset_zoo[cfg.DATASET.NAME]
     data = dataset(
         file_list=name,
