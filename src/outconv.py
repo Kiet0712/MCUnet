@@ -48,7 +48,7 @@ class OutConv(nn.Module):
                 for _ in range(self.n_class):
                     self.class_segment_conv.append(
                         nn.Sequential(
-                            conv(in_channels+n_channels*2,out_channels//3,kernel_size=1),
+                            conv(in_channels+n_channels*2,1,kernel_size=1),
                             nn.Sigmoid()
                         )
                     )
