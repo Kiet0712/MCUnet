@@ -3,7 +3,7 @@ from scipy.spatial.distance import directed_hausdorff
 
 
 def calculate_metrics(predict,gt):
-    labels = ["ET", "TC", "WT"]
+    labels = ["TC","WT","ET"]
     results = []
     for i, label in enumerate(labels):
         if np.sum(gt[i])==0:

@@ -157,11 +157,11 @@ def validation(cfg,model,val_dataloader,device):
     else:
         return validation_sliding_windown(cfg,model,val_dataloader,device)
 def update_PLOT(PLOT,result):
-    et,tc,wt = result[0],result[1],result[2]
+    tc,wt,et = result[0],result[1],result[2]
     for i in range(4):
-        PLOT['et'][i].append(et[i])
         PLOT['tc'][i].append(tc[i])
         PLOT['wt'][i].append(wt[i])
+        PLOT['et'][i].append(et[i])
     return PLOT
 def PLOT_RESULT_GRAPH(PLOT):
     figure, axis = plt.subplots(2, 2,figsize=(10,10))
@@ -180,9 +180,9 @@ def PLOT_RESULT_GRAPH(PLOT):
             y, x = 1,0
         else:
             y, x = 1,1
-        axis[y,x].plot(PLOT['et'][i], linestyle='-', marker='o', color='r', label='ET')
-        axis[y,x].plot(PLOT['tc'][i], linestyle='-', marker='o', color='g', label='TC')
-        axis[y,x].plot(PLOT['wt'][i], linestyle='-', marker='o', color='b', label='WT')
+        axis[y,x].plot(PLOT['tc'][i], linestyle='-', marker='o', color='r', label='tc')
+        axis[y,x].plot(PLOT['wt'][i], linestyle='-', marker='o', color='g', label='wt')
+        axis[y,x].plot(PLOT['et'][i], linestyle='-', marker='o', color='b', label='et')
         axis[y,x].set_title(mapping_dict[i])
     plt.legend()
     plt.show()

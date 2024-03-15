@@ -55,67 +55,30 @@ class MHLoss_SELF_GUIDE(nn.Module):
     def forward(self,data,gt_volume,volume):
         segment_volume = data['segment_volume']
         reconstruct_volume = data['reconstruct_volume']
-        class_1_foreground = data['class_1_foreground']
-        class_2_foreground = data['class_2_foreground']
-        class_4_foreground = data['class_4_foreground']
-        class_1_background = data['class_1_background']
-        class_2_background = data['class_2_background']
-        class_4_background = data['class_4_background']
-
-
-        #calculate_main_loss
         segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
         reconstruct_volume_loss = F.l1_loss(reconstruct_volume,volume)
-        class_1_foreground_loss = F.l1_loss(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])
-        class_2_foreground_loss = F.l1_loss(class_2_foreground,volume*gt_volume[:,2:,:,:,:])
-        class_4_foreground_loss = F.l1_loss(class_4_foreground,volume*gt_volume[:,0:1,:,:,:])
-        class_1_background_loss = F.l1_loss(class_1_background,volume*(1-gt_volume[:,1:2,:,:,:]))
-        class_2_background_loss = F.l1_loss(class_2_background,volume*(1-gt_volume[:,2:,:,:,:]))
-        class_4_background_loss = F.l1_loss(class_4_background,volume*(1-gt_volume[:,0:1,:,:,:]))
-        #calculate_guide_loss
-        reconstruct_guide_loss = F.l1_loss(reconstruct_volume,class_1_background+class_1_foreground)+\
-                                 F.l1_loss(reconstruct_volume,class_2_background+class_2_foreground)+\
-                                 F.l1_loss(reconstruct_volume,class_4_background+class_4_foreground)
-        class_1_background_guide_loss = F.l1_loss(class_1_background,reconstruct_volume*(1-segment_volume[:,1:2,:,:,:]))
-        class_1_foreground_guide_loss = F.l1_loss(class_1_foreground,reconstruct_volume*segment_volume[:,1:2,:,:,:])
-        class_2_background_guide_loss = F.l1_loss(class_2_background,reconstruct_volume*(1-segment_volume[:,2:,:,:,:]))
-        class_2_foreground_guide_loss = F.l1_loss(class_2_foreground,reconstruct_volume*segment_volume[:,2:,:,:,:])
-        class_4_background_guide_loss = F.l1_loss(class_4_background,reconstruct_volume*(1-segment_volume[:,0:1,:,:,:]))
-        class_4_foreground_guide_loss = F.l1_loss(class_4_foreground,reconstruct_volume*segment_volume[:,0:1,:,:,:])
-
-        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
-               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
-               self.lamda_list['c1_fg_loss']*class_1_foreground_loss+\
-               self.lamda_list['c2_fg_loss']*class_2_foreground_loss+\
-               self.lamda_list['c4_fg_loss']*class_4_foreground_loss+\
-               self.lamda_list['c1_bg_loss']*class_1_background_loss+\
-               self.lamda_list['c2_bg_loss']*class_2_background_loss+\
-               self.lamda_list['c4_bg_loss']*class_4_background_loss+\
-               self.lamda_list['recstr_guide_loss']*reconstruct_guide_loss+\
-               self.lamda_list['c1_bg_guide_loss']*class_1_background_guide_loss+\
-               self.lamda_list['c1_fg_guide_loss']*class_1_foreground_guide_loss+\
-               self.lamda_list['c2_bg_guide_loss']*class_2_background_guide_loss+\
-               self.lamda_list['c2_fg_guide_loss']*class_2_foreground_guide_loss+\
-               self.lamda_list['c4_bg_guide_loss']*class_4_background_guide_loss+\
-               self.lamda_list['c4_fg_guide_loss']*class_4_foreground_guide_loss
-        return {
-            'loss': loss,
+        loss = {
             'seg_vol_loss':segment_volume_loss,
             'recstr_vol_loss':reconstruct_volume_loss,
-            'c1_fg_loss':class_1_foreground_loss,
-            'c2_fg_loss':class_2_foreground_loss,
-            'c4_fg_loss':class_4_foreground_loss,
-            'c1_bg_loss':class_1_background_loss,
-            'c2_bg_loss':class_2_background_loss,
-            'c4_bg_loss':class_4_background_loss,
-            'recstr_guide_loss':reconstruct_guide_loss,
-            'c1_bg_guide_loss':class_1_background_guide_loss,
-            'c1_fg_guide_loss':class_1_foreground_guide_loss,
-            'c2_bg_guide_loss':class_2_background_guide_loss,
-            'c2_fg_guide_loss':class_2_foreground_guide_loss,
-            'c4_bg_guide_loss':class_4_background_guide_loss,
-            'c4_fg_guide_loss':class_4_foreground_guide_loss
         }
+        reconstruct_guide_loss = 0
+        for i in range(self.n_classes):
+            str_class = 'class_' + str(i+1) + '_'
+            short_str = 'c'+str(i+1)+'_'
+            foreground_mask = data[str_class+'foreground']
+            background_mask = data[str_class+'background']
+            loss[short_str+'fg_loss'] = F.l1_loss(foreground_mask,volume*gt_volume[:,i:(i+1)])
+            loss[short_str+'bg_loss'] = F.l1_loss(background_mask,volume*(1-gt_volume[:,i:(i+1)]))
+            loss[short_str+'fg_guide_loss'] = F.l1_loss(foreground_mask,reconstruct_volume*segment_volume[:,i:(i+1)])
+            loss[short_str+'bg_guide_loss'] = F.l1_loss(background_mask,reconstruct_volume*(1-segment_volume[:,i:(i+1)]))
+            reconstruct_guide_loss+=F.l1_loss(reconstruct_volume,foreground_mask+data[str_class+'background'])
+
+        loss['recstr_guide_loss'] = reconstruct_guide_loss
+        sum_loss = 0
+        for key in loss:
+            sum_loss+=loss[key]*self.lamda_list[key]
+        loss['loss']=sum_loss
+        return loss
 class MHLoss(nn.Module):
     def __init__(self,lamda_list,n_classes):
         super().__init__()
@@ -125,40 +88,21 @@ class MHLoss(nn.Module):
     def forward(self,data,gt_volume,volume):
         segment_volume = data['segment_volume']
         reconstruct_volume = data['reconstruct_volume']
-        class_1_foreground = data['class_1_foreground']
-        class_2_foreground = data['class_2_foreground']
-        class_4_foreground = data['class_4_foreground']
-        class_1_background = data['class_1_background']
-        class_2_background = data['class_2_background']
-        class_4_background = data['class_4_background']
-
-
-        #calculate_main_loss
         segment_volume_loss = self.dicebce(segment_volume,gt_volume)['loss']
         reconstruct_volume_loss = F.l1_loss(reconstruct_volume,volume)
-        class_1_foreground_loss = F.l1_loss(class_1_foreground,volume*gt_volume[:,1:2,:,:,:])
-        class_2_foreground_loss = F.l1_loss(class_2_foreground,volume*gt_volume[:,2:,:,:,:])
-        class_4_foreground_loss = F.l1_loss(class_4_foreground,volume*gt_volume[:,0:1,:,:,:])
-        class_1_background_loss = F.l1_loss(class_1_background,volume*(1-gt_volume[:,1:2,:,:,:]))
-        class_2_background_loss = F.l1_loss(class_2_background,volume*(1-gt_volume[:,2:,:,:,:]))
-        class_4_background_loss = F.l1_loss(class_4_background,volume*(1-gt_volume[:,0:1,:,:,:]))
-
-        loss = self.lamda_list['seg_vol_loss']*segment_volume_loss+\
-               self.lamda_list['recstr_vol_loss']*reconstruct_volume_loss+\
-               self.lamda_list['c1_fg_loss']*class_1_foreground_loss+\
-               self.lamda_list['c2_fg_loss']*class_2_foreground_loss+\
-               self.lamda_list['c4_fg_loss']*class_4_foreground_loss+\
-               self.lamda_list['c1_bg_loss']*class_1_background_loss+\
-               self.lamda_list['c2_bg_loss']*class_2_background_loss+\
-               self.lamda_list['c4_bg_loss']*class_4_background_loss
-        return {
-            'loss': loss,
+        loss = {
             'seg_vol_loss':segment_volume_loss,
             'recstr_vol_loss':reconstruct_volume_loss,
-            'c1_fg_loss':class_1_foreground_loss,
-            'c2_fg_loss':class_2_foreground_loss,
-            'c4_fg_loss':class_4_foreground_loss,
-            'c1_bg_loss':class_1_background_loss,
-            'c2_bg_loss':class_2_background_loss,
-            'c4_bg_loss':class_4_background_loss
         }
+        for i in range(self.n_classes):
+            str_class = 'class_' + str(i+1) + '_'
+            short_str = 'c'+str(i+1)+'_'
+            foreground_mask = data[str_class+'foreground']
+            background_mask = data[str_class+'background']
+            loss[short_str+'fg_loss'] = F.l1_loss(foreground_mask,volume*gt_volume[:,i:(i+1)])
+            loss[short_str+'bg_loss'] = F.l1_loss(background_mask,volume*(1-gt_volume[:,i:(i+1)]))
+        sum_loss = 0
+        for key in loss:
+            sum_loss+=loss[key]*self.lamda_list[key]
+        loss['loss']=sum_loss
+        return loss

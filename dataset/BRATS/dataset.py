@@ -180,7 +180,7 @@ def train_transformation(dataset):
     et = dataset['label']==4
     tc = np.logical_or(et,dataset['label']==1)
     wt = np.logical_or(tc,dataset['label']==2)
-    patient_label = np.stack([et,tc,wt]).astype('float32')
+    patient_label = np.stack([tc,wt,et]).astype('float32')
     z_indexes, y_indexes, x_indexes = np.nonzero(np.sum(patient_img, axis=0) != 0)
     zmin, ymin, xmin = [max(0, int(np.min(arr) - 1)) for arr in (z_indexes, y_indexes, x_indexes)]
     zmax, ymax, xmax = [int(np.max(arr) + 1) for arr in (z_indexes, y_indexes, x_indexes)]
@@ -205,7 +205,7 @@ def val_transformation(dataset):
     et = dataset['label']==4
     tc = np.logical_or(et,dataset['label']==1)
     wt = np.logical_or(tc,dataset['label']==2)
-    patient_label = np.stack([et,tc,wt]).astype('float32')
+    patient_label = np.stack([tc,wt,et]).astype('float32')
     z_indexes, y_indexes, x_indexes = np.nonzero(np.sum(patient_img, axis=0) != 0)
     zmin, ymin, xmin = [max(0, int(np.min(arr) - 1)) for arr in (z_indexes, y_indexes, x_indexes)]
     zmax, ymax, xmax = [int(np.max(arr) + 1) for arr in (z_indexes, y_indexes, x_indexes)]

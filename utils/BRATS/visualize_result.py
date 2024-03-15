@@ -20,11 +20,11 @@ def visualize(infor: list,mode: list):
             axs[0,3].imshow(inputs[3,:,:,layer],cmap='gray')
             axs[0,3].set_title('t2 ' + str(layer))
             axs[1,0].imshow(label[0,:,:,layer],cmap='gray')
-            axs[1,0].set_title('ET ' + str(layer))
+            axs[1,0].set_title('TC ' + str(layer))
             axs[1,1].imshow(label[1,:,:,layer],cmap='gray')
-            axs[1,1].set_title('TC ' + str(layer))
+            axs[1,1].set_title('WT ' + str(layer))
             axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
-            axs[1,2].set_title('WT ' + str(layer))
+            axs[1,2].set_title('ET ' + str(layer))
             mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
             mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
             mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
@@ -48,11 +48,11 @@ def visualize(infor: list,mode: list):
                 axs[0,3].imshow(inputs[3,:,:,layer],cmap='gray')
                 axs[0,3].set_title('t2 ' + str(layer))
                 axs[1,0].imshow(label[0,:,:,layer],cmap='gray')
-                axs[1,0].set_title('ET ' + str(layer))
+                axs[1,0].set_title('TC ' + str(layer))
                 axs[1,1].imshow(label[1,:,:,layer],cmap='gray')
-                axs[1,1].set_title('TC ' + str(layer))
+                axs[1,1].set_title('WT ' + str(layer))
                 axs[1,2].imshow(label[2,:,:,layer],cmap='gray')
-                axs[1,2].set_title('WT ' + str(layer))
+                axs[1,2].set_title('ET ' + str(layer))
                 mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
                 mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
                 mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
@@ -60,11 +60,11 @@ def visualize(infor: list,mode: list):
                 axs[1,3].imshow(mask_label)
                 axs[1,3].set_title('Mask label ' + str(layer))
                 axs[2,0].imshow(outputs[0,:,:,layer],cmap='gray')
-                axs[2,0].set_title('ET predict' + str(layer))
+                axs[2,0].set_title('TC predict' + str(layer))
                 axs[2,1].imshow(outputs[1,:,:,layer],cmap='gray')
-                axs[2,1].set_title('TC predict' + str(layer))
+                axs[2,1].set_title('WT predict' + str(layer))
                 axs[2,2].imshow(outputs[2,:,:,layer],cmap='gray')
-                axs[2,2].set_title('WT predict' + str(layer))
+                axs[2,2].set_title('ET predict' + str(layer))
                 mask_label_predict = np.zeros_like(outputs[0,:,:,layer],dtype=np.uint8)
                 mask_label_predict[np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[1]]=2
                 mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
@@ -81,27 +81,27 @@ def visualize(infor: list,mode: list):
             class_1_background_predict = infor[2]['class_1_background'][0]
             class_2_foreground_predict = infor[2]['class_2_foreground'][0]
             class_2_background_predict = infor[2]['class_2_background'][0]
-            class_4_foreground_predict = infor[2]['class_4_foreground'][0]
-            class_4_background_predict = infor[2]['class_4_background'][0]
-            class_1_foreground_gt = inputs*label[1:2,:,:,:]
-            class_1_background_gt = inputs*(1-label[1:2,:,:,:])
-            class_2_foreground_gt = inputs*label[2:,:,:,:]
-            class_2_background_gt = inputs*(1-label[2:,:,:,:])
-            class_4_foreground_gt = inputs*label[0:1,:,:,:]
-            class_4_background_gt = inputs*(1-label[0:1,:,:,:])
+            class_3_foreground_predict = infor[2]['class_3_foreground'][0]
+            class_3_background_predict = infor[2]['class_3_background'][0]
+            class_1_foreground_gt = inputs*label[0:1,:,:,:]
+            class_1_background_gt = inputs*(1-label[0:1,:,:,:])
+            class_2_foreground_gt = inputs*label[1:2,:,:,:]
+            class_2_background_gt = inputs*(1-label[1:2,:,:,:])
+            class_3_foreground_gt = inputs*label[2:3,:,:,:]
+            class_3_background_gt = inputs*(1-label[2:3,:,:,:])
             dict_mask = {
                 'class_1_foreground_predict':class_1_foreground_predict,
                 'class_1_background_predict':class_1_background_predict,
                 'class_2_foreground_predict':class_2_foreground_predict,
                 'class_2_background_predict':class_2_background_predict,
-                'class_4_foreground_predict':class_4_foreground_predict,
-                'class_4_background_predict':class_4_background_predict,
+                'class_4_foreground_predict':class_3_foreground_predict,
+                'class_4_background_predict':class_3_background_predict,
                 'class_1_foreground_gt':class_1_foreground_gt,
                 'class_1_background_gt':class_1_background_gt,
                 'class_2_foreground_gt':class_2_foreground_gt,
                 'class_2_background_gt':class_2_background_gt,
-                'class_4_foreground_gt':class_4_foreground_gt,
-                'class_4_background_gt':class_4_background_gt
+                'class_4_foreground_gt':class_3_foreground_gt,
+                'class_4_background_gt':class_3_background_gt
             }
             def multi_head_visualize_input_label_output_model(layer):
                 fig, axs = plt.subplots(16, 4,figsize=(15,24))
@@ -122,11 +122,11 @@ def visualize(infor: list,mode: list):
                 axs[1,3].imshow(reconstruct_volume[3,:,:,layer],cmap='gray')
                 axs[1,3].set_title('t2 reconstruct ' + str(layer))
                 axs[2,0].imshow(label[0,:,:,layer],cmap='gray')
-                axs[2,0].set_title('ET ' + str(layer))
+                axs[2,0].set_title('TC ' + str(layer))
                 axs[2,1].imshow(label[1,:,:,layer],cmap='gray')
-                axs[2,1].set_title('TC ' + str(layer))
+                axs[2,1].set_title('WT ' + str(layer))
                 axs[2,2].imshow(label[2,:,:,layer],cmap='gray')
-                axs[2,2].set_title('WT ' + str(layer))
+                axs[2,2].set_title('ET ' + str(layer))
                 mask_label = np.zeros_like(label[0,:,:,layer],dtype=np.uint8)
                 mask_label[np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[0],np.where(np.logical_and(label[2,:,:,layer]==1, np.logical_not(label[1,:,:,layer]==1)))[1]]=2
                 mask_label[np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[0],np.where(np.logical_and(label[1,:,:,layer]==1, np.logical_not(label[0,:,:,layer]==1)))[1]]=1
@@ -134,11 +134,11 @@ def visualize(infor: list,mode: list):
                 axs[2,3].imshow(mask_label)
                 axs[2,3].set_title('Mask label ' + str(layer))
                 axs[3,0].imshow(outputs[0,:,:,layer],cmap='gray')
-                axs[3,0].set_title('ET predict' + str(layer))
+                axs[3,0].set_title('TC predict' + str(layer))
                 axs[3,1].imshow(outputs[1,:,:,layer],cmap='gray')
-                axs[3,1].set_title('TC predict' + str(layer))
+                axs[3,1].set_title('WT predict' + str(layer))
                 axs[3,2].imshow(outputs[2,:,:,layer],cmap='gray')
-                axs[3,2].set_title('WT predict' + str(layer))
+                axs[3,2].set_title('ET predict' + str(layer))
                 mask_label_predict = np.zeros_like(outputs[0,:,:,layer],dtype=np.uint8)
                 mask_label_predict[np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[2,:,:,layer]==1, np.logical_not(outputs[1,:,:,layer]==1)))[1]]=2
                 mask_label_predict[np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[0],np.where(np.logical_and(outputs[1,:,:,layer]==1, np.logical_not(outputs[0,:,:,layer]==1)))[1]]=1
@@ -149,7 +149,7 @@ def visualize(infor: list,mode: list):
                 mask_value_label = {
                     '1':'TC',
                     '2':'WT',
-                    '4':'ET'
+                    '3':'ET'
                 }
                 for class_value in ['1','2','4']:
                     base_name = 'class_'
