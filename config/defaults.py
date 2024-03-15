@@ -85,17 +85,17 @@ _C.MULTI_HEAD_LOSS_NAME = [
     'recstr_vol_loss',
     'c1_fg_loss',
     'c2_fg_loss',
-    'c4_fg_loss',
+    'c3_fg_loss',
     'c1_bg_loss',
     'c2_bg_loss',
-    'c4_bg_loss',
+    'c3_bg_loss',
     'recstr_guide_loss',
     'c1_bg_guide_loss',
     'c1_fg_guide_loss',
     'c2_bg_guide_loss',
     'c2_fg_guide_loss',
-    'c4_bg_guide_loss',
-    'c4_fg_guide_loss'
+    'c3_bg_guide_loss',
+    'c3_fg_guide_loss'
 ]
 _C.MULTI_HEAD_LOSS_WEIGHT = [5,2,2,2,2,2,2,2,0.75,0.75,0.75,0.75,0.75,0.75,0.75]
 _C.N_CLASS = 3
