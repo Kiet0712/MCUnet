@@ -10,7 +10,23 @@ import sys
 import pandas as pd
 import numpy as np
 import torch.nn as nn
-from utils.loss import DiceLoss
+class DiceMetric(nn.Module):
+    def __init__(self):
+        super(DiceMetric, self).__init__()
+
+    def forward(self, pred, target):
+        smooth = 0.001
+
+        size = target.size(0)
+
+        pred_flat = pred.view(size, -1)
+        target_flat = target.view(size, -1)
+
+        intersection = pred_flat * target_flat
+        dice_score = (2 * intersection.sum(1) + smooth)/ (pred_flat.sum(1) + target_flat.sum(1) + smooth)
+        dice_loss = dice_score.sum()/size
+
+        return dice_loss
 torch.backends.cudnn.benchmark = True
 def myprint(x,log_to_screen = cfg.LOG_TO_SCREEN):
     with open(cfg.LOG_PATH,"a") as f:
@@ -32,7 +48,7 @@ def validation(cfg,model,val_dataloader,device):
             answer.append(label)
         predict = torch.cat(predict,dim=0)
         answer = torch.cat(answer).unsqueeze(0)
-        dsc = 1-DiceLoss()(predict,answer)
+        dsc = DiceMetric()(predict,answer)
         return dsc
 def train(cfg,device):
     train_transform = ut.ExtCompose([ut.ExtResize((224,224)),
