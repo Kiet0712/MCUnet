@@ -9,7 +9,7 @@ class Down(nn.Module):
     def __init__(self,cfg,in_channels,out_channels):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
-            nn.MaxPool3d(2),
+            nn.MaxPool3d(2) if cfg.MODEL.CONV_TYPE[-2]=='3d' else nn.MaxPool2d(2),
             DoubleConv(cfg,in_channels, out_channels)
         )
     def forward(self,x):
