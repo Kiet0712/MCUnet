@@ -71,7 +71,7 @@ def validation(cfg,model,val_dataloader,device):
         for i,data in enumerate(tqdm(val_dataloader)):
             img,mask = data
             inputs = img.to(device)
-            label = mask.to(device)
+            label = mask.to(device).long()
             
             output = model(inputs)
 
@@ -121,7 +121,7 @@ def train(cfg,device):
             loop.set_description(f"Epoch [{epoch}/{cfg.SOLVER.MAX_EPOCHS}]")
             img,mask = data
             inputs = img.to(device)
-            label = mask.to(device)
+            label = mask.to(device).long()
             optim.zero_grad()
             outputs = model(inputs)
             loss_cal = loss_func(outputs,label,inputs)
