@@ -47,9 +47,10 @@ class BceDiceLoss(nn.Module):
 
         return {'loss':loss}
 class MHLoss_SELF_GUIDE(nn.Module):
-    def __init__(self,lamda_list):
+    def __init__(self,lamda_list,n_classes):
         super().__init__()
         self.lamda_list = lamda_list
+        self.n_classes = n_classes
         self.dicebce = BceDiceLoss()
     def forward(self,data,gt_volume,volume):
         segment_volume = data['segment_volume']
@@ -116,9 +117,10 @@ class MHLoss_SELF_GUIDE(nn.Module):
             'c4_fg_guide_loss':class_4_foreground_guide_loss
         }
 class MHLoss(nn.Module):
-    def __init__(self,lamda_list):
+    def __init__(self,lamda_list,n_classes):
         super().__init__()
         self.lamda_list = lamda_list
+        self.n_classes = n_classes
         self.dicebce = BceDiceLoss()
     def forward(self,data,gt_volume,volume):
         segment_volume = data['segment_volume']

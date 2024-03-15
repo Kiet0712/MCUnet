@@ -83,9 +83,9 @@ def make_loss_function(cfg):
         i+=1
     if cfg.MODEL.MULTIHEAD_OUTPUT:
         if cfg.SELF_GUIDE_LOSS:
-            return MHLoss_SELF_GUIDE(dict_weight_loss)
+            return MHLoss_SELF_GUIDE(dict_weight_loss,cfg.N_CLASS)
         else:
-            return MHLoss(dict_weight_loss)
+            return MHLoss(dict_weight_loss,cfg.N_CLASS)
                 
     else:
         return BceDiceLoss()
