@@ -38,9 +38,9 @@ def train(cfg,device):
     optim = make_optimizers(cfg,model)
     scheduler = make_scheduler(cfg,optim)
     PLOT = {
-        'et':[[],[],[],[]],
         'tc':[[],[],[],[]],
-        'wt':[[],[],[],[]]
+        'wt':[[],[],[],[]],
+        'et':[[],[],[],[]]
     }
     current_epoch = 1
     loss_func = make_loss_function(cfg)
@@ -51,14 +51,14 @@ def train(cfg,device):
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         PLOT = checkpoint['plot']
         current_epoch = checkpoint['current_epoch']+1
-        result_plot = np.stack([np.array(PLOT['et']),np.array(PLOT['tc']),np.array(PLOT['wt'])],axis=0)
+        result_plot = np.stack([np.array(PLOT['tc']),np.array(PLOT['wt']),np.array(PLOT['et'])],axis=0)
         result_plot_mean_by_class = np.mean(result_plot,axis=0)
         best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
         best_result = result_plot[:,:,best_epoch_result]
         myprint('CHECKPOINT_LOADING FROM ' + str(cfg.CHECKPOINT.PATH),True)
         myprint('--------------------------------------------BEST_RESULT--------------------------------------------',True)
         myprint('--------------------------------------------EPOCH ' + str(best_epoch_result+1)+'--------------------------------------------',True)
-        myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']),True)
+        myprint(pd.DataFrame(best_result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['TC','WT','ET']),True)
         PLOT_RESULT_GRAPH(PLOT)
         myprint('Current epoch = ' + str(current_epoch),True)
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
@@ -101,11 +101,11 @@ def train(cfg,device):
             myprint("--------------------------------VALIDATION EPOCH " + str(epoch) + "--------------------------------",True)
             torch.backends.cudnn.benchmark = False
             result = validation(cfg,model,val_dataloader,device)
-            myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['ET','TC','WT']),True)
+            myprint(pd.DataFrame(result,columns = ['Hausdorff Distance','Sensitivity','Specificity','Dice Score'],index = ['TC','WT','ET']),True)
             PLOT = update_PLOT(PLOT,result)
             if cfg.PLOT_GRAPH_RESULT:
                 PLOT_RESULT_GRAPH(PLOT)
-            result_plot = np.stack([np.array(PLOT['et']),np.array(PLOT['tc']),np.array(PLOT['wt'])],axis=0)
+            result_plot = np.stack([np.array(PLOT['tc']),np.array(PLOT['wt']),np.array(PLOT['et'])],axis=0)
             result_plot_mean_by_class = np.mean(result_plot,axis=0)
             best_epoch_result = np.argmax(result_plot_mean_by_class[-1,:])
             if best_epoch_result==len(PLOT['et'][0])-1:
