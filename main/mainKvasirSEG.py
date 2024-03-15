@@ -120,6 +120,7 @@ def train(cfg,device):
             result = validation(cfg,model,val_dataloader,device)
             myprint('dice = ' + str(result),True)
             if result > best_dice:
+                best_dice = result
                 best_checkpoint_save = 'best_checkpoint.pth'
                 myprint('NEW BEST RESULT WILL BE SAVE IN ' + best_checkpoint_save,True)
                 torch.save(
