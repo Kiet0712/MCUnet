@@ -10,7 +10,7 @@ class Model(nn.Module):
     def __init__(self,cfg):
         super().__init__()
         num_feature_start = cfg.MODEL.NUM_FEATURES_START_UNET
-        self.inc = DoubleConv(cfg,4,num_feature_start)
+        self.inc = DoubleConv(cfg,cfg.CHANNEL_IN,num_feature_start)
         self.down1 = Down(cfg,num_feature_start,num_feature_start*2)
         self.down2 = Down(cfg,num_feature_start*2,num_feature_start*4)
         self.down3 = Down(cfg,num_feature_start*4,num_feature_start*8)
