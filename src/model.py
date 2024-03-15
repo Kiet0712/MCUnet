@@ -34,7 +34,7 @@ class Model(nn.Module):
             self.MP2 = MultiPath(cfg,num_feature_start*4)
             self.MP3 = MultiPath(cfg,num_feature_start*2)
             self.MP4 = MultiPath(cfg,num_feature_start)
-        self.outconv = OutConv(cfg,num_feature_start,3,4)
+        self.outconv = OutConv(cfg,num_feature_start,cfg.N_CLASS,cfg.CHANNEL_IN)
 
     def forward(self,x):
         x1 = self.inc(x)
