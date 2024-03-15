@@ -186,6 +186,6 @@ def test(cfg,device,checkpoint_path):
                                     transform=test_transform)
     test_loader = torch.utils.data.DataLoader(data_test, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
     model = make_model(cfg).to(device)
-    checkpoint = torch.load(cfg.CHECKPOINT.PATH)
+    checkpoint = torch.load(checkpoint_path)
     model.load_state_dict(checkpoint['model_state_dict'])
     print('Dice = ' + str(validation(cfg,model,test_loader,device)))
