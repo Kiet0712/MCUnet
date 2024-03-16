@@ -1,4 +1,4 @@
-from config.defaults import _C as cfg
+from config.KvasirSEG.defaults import _C as cfg
 from dataset.KvasirSEG.dataset import KvasirSEG_Dataset
 import torch
 from tqdm.auto import tqdm

@@ -1,4 +1,4 @@
-from config.defaults import _C as cfg
+from config.CVCClinicDB.defaults import _C as cfg
 from dataset.CVCClinicDB.dataset import CVCClinicDB_Dataset
 import torch
 from tqdm.auto import tqdm
