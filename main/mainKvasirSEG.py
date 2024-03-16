@@ -15,7 +15,7 @@ class DiceMetric(nn.Module):
         super(DiceMetric, self).__init__()
 
     def forward(self, pred, target):
-        smooth = 0.0001
+        smooth = 1e-6
 
         size = target.size(0)
 
