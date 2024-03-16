@@ -15,7 +15,7 @@ class DiceMetric(nn.Module):
         super(DiceMetric, self).__init__()
 
     def forward(self, pred, target):
-        smooth = 0.001
+        smooth = 0.0001
 
         size = target.size(0)
 
@@ -42,14 +42,15 @@ def validation(cfg,model,val_dataloader,device):
             inputs = img.to(device)
             label = mask.to(device).float()
             
-            output = model(inputs)
+            output = model(inputs)['segment_volume']
 
             predict.append(output)
             answer.append(label)
-        predict = torch.cat(predict,dim=0)
-        answer = torch.cat(answer,dim=0).unsqueeze(1)
-        dsc = DiceMetric()(predict,answer)
-        return dsc
+        predict = (torch.cat(predict,dim=0)>=0.5).float()
+        answer = torch.cat(answer).unsqueeze(1)
+        dsc1 = DiceMetric()(predict,answer)
+        dsc0 = DiceMetric()(1-predict,1-answer)
+        return (dsc1+dsc0)/2
 def train(cfg,device):
     train_transform = ut.ExtCompose([ut.ExtResize((224,224)),
                                      ut.ExtRandomRotation(degrees=90),
