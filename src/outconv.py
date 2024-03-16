@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from coordconv import CoordConv3d,TransposeCoordConv3d,CoordConv2d,TransposeCoordConv2d
 from attention import Attention_block
 
 
@@ -21,18 +20,12 @@ class OutConv(nn.Module):
             norm = nn.InstanceNorm2d
         elif cfg.MODEL.NORM == 'BN2d':
             norm = nn.BatchNorm2d
-        if cfg.MODEL.CONV_TYPE == 'normal3d':
+        if cfg.MODEL.CONV_TYPE[-2:] == '3d':
             conv = nn.Conv3d
             conv_transpose = nn.ConvTranspose3d
-        elif cfg.MODEL.CONV_TYPE == 'coord3d':
-            conv = CoordConv3d
-            conv_transpose = TransposeCoordConv3d
-        elif cfg.MODEL.CONV_TYPE == 'normal2d':
+        elif cfg.MODEL.CONV_TYPE[-2:] == '2d':
             conv = nn.Conv2d
             conv_transpose = nn.ConvTranspose2d
-        elif cfg.MODEL.CONV_TYPE == 'coord2d':
-            conv = CoordConv2d
-            conv_transpose = TransposeCoordConv2d
         if cfg.MODEL.MULTIHEAD_OUTPUT:
             if cfg.MODEL.SELF_GUIDE_OUTPUT:
                 self.reconstruct_volume_conv = nn.Sequential(

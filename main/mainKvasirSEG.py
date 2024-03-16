@@ -67,8 +67,8 @@ def train(cfg,device):
     data_val = KvasirSEG_Dataset(root = cfg.DATASET.ROOT_DIR, 
                                    dataset_type='val', 
                                    transform=val_transform)
-    train_dataloader = torch.utils.data.DataLoader(data_train, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=True, drop_last=True, num_workers=cfg.DATASET.NUM_WORKERS)
-    val_dataloader = torch.utils.data.DataLoader(data_val, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=True, num_workers=cfg.DATASET.NUM_WORKERS)
+    train_dataloader = torch.utils.data.DataLoader(data_train, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=True, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
+    val_dataloader = torch.utils.data.DataLoader(data_val, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
     model = make_model(cfg).to(device)
     optim = make_optimizers(cfg,model)
     scheduler = make_scheduler(cfg,optim)
@@ -153,7 +153,7 @@ def test(cfg,device,checkpoint_path):
     data_test = KvasirSEG_Dataset(root = cfg.DATASET.ROOT_DIR, 
                                     dataset_type='test', 
                                     transform=test_transform)
-    test_loader = torch.utils.data.DataLoader(data_test, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=True, num_workers=cfg.DATASET.NUM_WORKERS)
+    test_loader = torch.utils.data.DataLoader(data_test, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
     model = make_model(cfg).to(device)
     checkpoint = torch.load(checkpoint_path)
     model.load_state_dict(checkpoint['model_state_dict'])
