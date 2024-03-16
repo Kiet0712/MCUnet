@@ -1,8 +1,7 @@
-from config.CVCClinicDB.defaults import _C as cfg
-from dataset.CVCClinicDB.dataset import CVCClinicDB_Dataset
+from config.Polyp.defaults import _C as cfg
+from dataset.Polyp.dataset import PolypDataset, test_dataset
 import torch
 from tqdm.auto import tqdm
-import utils.CVCClinicDB.utils as ut
 import os
 from utils.share_utils import *
 from src.model_main import make_model
@@ -40,7 +39,7 @@ def validation(cfg,model,val_dataloader,device):
         for i,data in enumerate(tqdm(val_dataloader)):
             img,mask = data
             inputs = img.to(device)
-            label = mask.to(device).float()
+            label = mask.to(device)
             
             output = model(inputs)['segment_volume']
 
@@ -52,36 +51,23 @@ def validation(cfg,model,val_dataloader,device):
         dsc0 = DiceMetric()(1-predict,1-answer)
         return (dsc1+dsc0)/2
 def train(cfg,device):
-    train_transform = ut.ExtCompose([ut.ExtResize((224,224)),
-                                     ut.ExtRandomRotation(degrees=90),
-                                     ut.ExtRandomHorizontalFlip(),
-                                     ut.ExtToTensor(),
-                                     ])
-
-    val_transform = ut.ExtCompose([ut.ExtResize((224,224)),
-                                   ut.ExtToTensor(),
-                                   ])
-    data_train = CVCClinicDB_Dataset(root = cfg.DATASET.ROOT_DIR, 
-                                     dataset_type='train', 
-                                     transform=train_transform) 
-    data_val = CVCClinicDB_Dataset(root = cfg.DATASET.ROOT_DIR, 
-                                   dataset_type='val', 
-                                   transform=val_transform)
+    data_train = PolypDataset(os.path.join(cfg.DATASET.ROOT_DIR,'image'),os.path.join(cfg.DATASET.ROOT_DIR,'masks'))
+    data_val = []
+    for i in range(len(cfg.DATASET.TEST_DATASET)):
+        data_val.append(test_dataset(os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'image'),os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'masks')))
     train_dataloader = torch.utils.data.DataLoader(data_train, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=True, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
-    val_dataloader = torch.utils.data.DataLoader(data_val, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
+    val_dataloader = [torch.utils.data.DataLoader(data_val[i], batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS) for i in range(len(cfg.DATASET.TEST_DATASET))]
     model = make_model(cfg).to(device)
     optim = make_optimizers(cfg,model)
     scheduler = make_scheduler(cfg,optim)
     loss_func = make_loss_function(cfg)
     current_epoch = 1
-    best_dice = -1
     if cfg.CHECKPOINT.LOAD:
         checkpoint = torch.load(cfg.CHECKPOINT.PATH)
         model.load_state_dict(checkpoint['model_state_dict'])
         optim.load_state_dict(checkpoint['optim_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         current_epoch = checkpoint['current_epoch']+1
-        best_dice = checkpoint['best_dice']
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         running_loss = {}
         loop = tqdm(enumerate(train_dataloader),total=len(train_dataloader),leave=False)
@@ -118,21 +104,9 @@ def train(cfg,device):
         scheduler.step()
         if epoch % cfg.SOLVER.EVAL_EPOCH_INTERVAL == 0:
             myprint("--------------------------------VALIDATION EPOCH " + str(epoch) + "--------------------------------",True)
-            result = validation(cfg,model,val_dataloader,device)
-            myprint('dice = ' + str(result),True)
-            if result > best_dice:
-                best_dice = result
-                best_checkpoint_save = 'best_checkpoint.pth'
-                myprint('NEW BEST RESULT WILL BE SAVE IN ' + best_checkpoint_save,True)
-                torch.save(
-                    {
-                        'model_state_dict':model.state_dict(),
-                        'optim_state_dict':optim.state_dict(),
-                        'current_epoch': epoch,
-                        'best_dice':result,
-                        'scheduler_state_dict':scheduler.state_dict()
-                    },best_checkpoint_save
-                )
+            for i in range(len(cfg.DATASET.TEST_DATASET)):
+                result = validation(cfg,model,val_dataloader[i],device)
+                myprint('mDice ' + cfg.DATASET.TEST_DATASET[i] + ' = ' + str(result),True)
         if epoch%cfg.SOLVER.SAVE_CHECKPOINT_INTERVAL==0:
             checkpoint_save_path = 'checkpoint_'+str(epoch)+'.pth'
             torch.save(
@@ -140,21 +114,6 @@ def train(cfg,device):
                     'model_state_dict':model.state_dict(),
                     'optim_state_dict':optim.state_dict(),
                     'current_epoch': epoch,
-                    'best_dice':best_dice,
                     'scheduler_state_dict':scheduler.state_dict()
                 },checkpoint_save_path
             )
-def test(cfg,device,checkpoint_path):
-    # preprocceing #
-    test_transform = ut.ExtCompose([ut.ExtResize((224,224)),
-                                    ut.ExtToTensor(),
-                                    ])
-    # data loader #
-    data_test = CVCClinicDB_Dataset(root = cfg.DATASET.ROOT_DIR, 
-                                    dataset_type='test', 
-                                    transform=test_transform)
-    test_loader = torch.utils.data.DataLoader(data_test, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
-    model = make_model(cfg).to(device)
-    checkpoint = torch.load(checkpoint_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    print('Dice = ' + str(validation(cfg,model,test_loader,device)))
