@@ -164,8 +164,8 @@ class TransposeCoordConv2d(conv.ConvTranspose2d):
                                           stride, padding, dilation, groups, bias)
         self.rank = 2
         self.addcoords = AddCoords(self.rank, with_r, use_cuda=use_cuda)
-        self.conv = nn.ConvTranspose2d(in_channels + self.rank + int(with_r), out_channels,
-                              kernel_size, stride, padding, dilation, groups, bias)
+        self.conv = nn.ConvTranspose2d(in_channels=in_channels + self.rank + int(with_r), out_channels=out_channels,
+                              kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias)
 
     def forward(self, input_tensor):
         """
@@ -205,8 +205,8 @@ class TransposeCoordConv3d(conv.ConvTranspose3d):
                                           stride, padding, dilation, groups, bias)
         self.rank = 3
         self.addcoords = AddCoords(self.rank, with_r, use_cuda=use_cuda)
-        self.conv = nn.ConvTranspose3d(in_channels + self.rank + int(with_r), out_channels,
-                              kernel_size, stride, padding, dilation, groups, bias)
+        self.conv = nn.ConvTranspose3d(in_channels=in_channels + self.rank + int(with_r), out_channels=out_channels,
+                              kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias)
 
     def forward(self, input_tensor):
 
