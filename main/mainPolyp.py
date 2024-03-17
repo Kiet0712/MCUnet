@@ -51,10 +51,10 @@ def validation(cfg,model,val_dataloader,device):
         dsc0 = DiceMetric()(1-predict,1-answer)
         return (dsc1+dsc0)/2
 def train(cfg,device):
-    data_train = PolypDataset(os.path.join(cfg.DATASET.ROOT_DIR,'image'),os.path.join(cfg.DATASET.ROOT_DIR,'masks'))
+    data_train = PolypDataset(os.path.join(cfg.DATASET.ROOT_DIR,'image'),os.path.join(cfg.DATASET.ROOT_DIR,'masks'),cfg.DATASET.IMG_SIZE)
     data_val = []
     for i in range(len(cfg.DATASET.TEST_DATASET)):
-        data_val.append(test_dataset(os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'image'),os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'masks')))
+        data_val.append(test_dataset(os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'image'),os.path.join(cfg.DATASET.TEST_DIR,cfg.DATASET.TEST_DATASET[i],'masks'),cfg.DATASET.IMG_SIZE))
     train_dataloader = torch.utils.data.DataLoader(data_train, batch_size=cfg.DATASET.BATCH_SIZE, shuffle=True, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS)
     val_dataloader = [torch.utils.data.DataLoader(data_val[i], batch_size=cfg.DATASET.BATCH_SIZE, shuffle=False, drop_last=False, num_workers=cfg.DATASET.NUM_WORKERS) for i in range(len(cfg.DATASET.TEST_DATASET))]
     model = make_model(cfg).to(device)
