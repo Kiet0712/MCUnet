@@ -11,3 +11,4 @@ Portions of the code are borrowed from
  - [vizviva_brats_2021](https://github.com/himashi92/vizviva_brats_2021.git)
  - [CoordConv](https://github.com/walsvid/CoordConv.git)
  - [Adaptive_t-vMF_Dice_loss](https://github.com/usagisukisuki/Adaptive_t-vMF_Dice_loss.git)
+ - [PraNet](https://github.com/DengPingFan/PraNet)
