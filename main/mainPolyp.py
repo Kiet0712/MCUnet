@@ -46,7 +46,7 @@ def validation(cfg,model,val_dataloader,device):
             predict.append(output)
             answer.append(label)
         predict = (torch.cat(predict,dim=0)>=0.5).float()
-        answer = torch.cat(answer).unsqueeze(1)
+        answer = torch.cat(answer)
         dsc1 = DiceMetric()(predict,answer)
         dsc0 = DiceMetric()(1-predict,1-answer)
         return (dsc1+dsc0)/2
@@ -75,7 +75,7 @@ def train(cfg,device):
             loop.set_description(f"Epoch [{epoch}/{cfg.SOLVER.MAX_EPOCHS}]")
             img,mask = data
             inputs = img.to(device)
-            label = mask.to(device).float().unsqueeze(1)
+            label = mask.to(device).float()
             optim.zero_grad()
             outputs = model(inputs)
             loss_cal = loss_func(outputs,label,inputs)
