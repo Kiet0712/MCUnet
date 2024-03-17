@@ -2,9 +2,8 @@ import os
 import numpy as np
 from PIL import Image
 
-import jittor as jt
-from jittor.dataset import Dataset
-
+import torchvision.transforms as transforms
+from torch.utils.data import Dataset
 
 class PolypDataset(Dataset):
     def __init__(self, image_root, gt_root, trainsize):
@@ -17,13 +16,13 @@ class PolypDataset(Dataset):
         self.gts = sorted(self.gts)
         self.filter_files()
         self.size = len(self.images)
-        self.img_transform = jt.transform.Compose([
-            jt.transform.Resize((self.trainsize, self.trainsize)),
-            jt.transform.ToTensor(),
-            jt.transform.ImageNormalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
-        self.gt_transform = jt.transform.Compose([
-            jt.transform.Resize((self.trainsize, self.trainsize)),
-            jt.transform.ToTensor()])
+        self.img_transform = transforms.Compose([
+            transforms.Resize((self.trainsize, self.trainsize)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        self.gt_transform = transforms.Compose([
+            transforms.Resize((self.trainsize, self.trainsize)),
+            transforms.ToTensor()])
 
     def __getitem__(self, index):
         image = self.rgb_loader(self.images[index])
@@ -83,13 +82,13 @@ class test_dataset(Dataset):
         self.gts = [os.path.join(gt_root, f) for f in os.listdir(gt_root) if f.endswith('.png')]
         self.images = sorted(self.images)
         self.gts = sorted(self.gts)
-        self.transform = jt.transform.Compose([
-            jt.transform.Resize((self.testsize, self.testsize)),
-            jt.transform.ToTensor(),
-            jt.transform.ImageNormalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
-        self.gt_transform = jt.transform.Compose([
-            jt.transform.Resize((self.testsize, self.testsize)),
-            jt.transform.ToTensor()])
+        self.img_transform = transforms.Compose([
+            transforms.Resize((self.testsize, self.testsize)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+        self.gt_transform = transforms.Compose([
+            transforms.Resize((self.testsize, self.testsize)),
+            transforms.ToTensor()])
         self.size = len(self.images)
 
     def __getitem__(self, index):
