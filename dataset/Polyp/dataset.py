@@ -87,13 +87,15 @@ class test_dataset(Dataset):
             jt.transform.Resize((self.testsize, self.testsize)),
             jt.transform.ToTensor(),
             jt.transform.ImageNormalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
-        self.gt_transform = jt.transform.ToTensor()
+        self.gt_transform = jt.transform.Compose([
+            jt.transform.Resize((self.trainsize, self.trainsize)),
+            jt.transform.ToTensor()])
         self.size = len(self.images)
 
     def __getitem__(self, index):
         image = self.rgb_loader(self.images[index])
         image = self.transform(image)
-        gt = self.binary_loader(self.gts[index])
+        gt = self.gt_transform(self.binary_loader(self.gts[index]))
         name = self.images[index].split('/')[(- 1)]
         if name.endswith('.jpg'):
             name = (name.split('.jpg')[0] + '.png')
