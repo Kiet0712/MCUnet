@@ -62,12 +62,17 @@ def train(cfg,device):
     scheduler = make_scheduler(cfg,optim)
     loss_func = make_loss_function(cfg)
     current_epoch = 1
+    RESULT = {
+        'mean': []
+    }
+    os.makedirs('bestcheckpoint', exist_ok=True)
     if cfg.CHECKPOINT.LOAD:
         checkpoint = torch.load(cfg.CHECKPOINT.PATH)
         model.load_state_dict(checkpoint['model_state_dict'])
         optim.load_state_dict(checkpoint['optim_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         current_epoch = checkpoint['current_epoch']+1
+        RESULT = checkpoint['RESULT']
     for epoch in range(current_epoch,cfg.SOLVER.MAX_EPOCHS+1):
         running_loss = {}
         loop = tqdm(enumerate(train_dataloader),total=len(train_dataloader),leave=False)
@@ -107,6 +112,32 @@ def train(cfg,device):
             for i in range(len(cfg.DATASET.TEST_DATASET)):
                 result = validation(cfg,model,val_dataloader[i],device)
                 myprint('mDice ' + cfg.DATASET.TEST_DATASET[i] + ' = ' + str(result),True)
+                if cfg.DATASET.TEST_DATASET[i] not in RESULT:
+                    RESULT[cfg.DATASET.TEST_DATASET[i]] = []
+                RESULT[cfg.DATASET.TEST_DATASET[i]].append(result.item())
+                if result.item() == max(RESULT[cfg.DATASET.TEST_DATASET[i]]):
+                    torch.save(
+                        {
+                            'model_state_dict':model.state_dict(),
+                            'optim_state_dict':optim.state_dict(),
+                            'current_epoch': epoch,
+                            'scheduler_state_dict':scheduler.state_dict()
+                        }, f'bestcheckpoint/best_{cfg.DATASET.TEST_DATASET[i]}.pth'
+                    )
+                    print(f'NEW BEST {cfg.DATASET.TEST_DATASET[i]}!')
+                    avg += result.item()
+                avg /= 5
+                RESULT['mean'].append(avg)
+                if avg == max(RESULT['mean']):
+                    torch.save(
+                            {
+                                'model_state_dict':model.state_dict(),
+                                'optim_state_dict':optim.state_dict(),
+                                'current_epoch': epoch,
+                                'scheduler_state_dict':scheduler.state_dict()
+                            }, 'bestcheckpoint/best_avg.pth'
+                        )
+                    print(f'NEW BEST AVERAGE!')
         if epoch%cfg.SOLVER.SAVE_CHECKPOINT_INTERVAL==0:
             checkpoint_save_path = 'checkpoint_'+str(epoch)+'.pth'
             torch.save(
@@ -114,6 +145,7 @@ def train(cfg,device):
                     'model_state_dict':model.state_dict(),
                     'optim_state_dict':optim.state_dict(),
                     'current_epoch': epoch,
-                    'scheduler_state_dict':scheduler.state_dict()
+                    'scheduler_state_dict':scheduler.state_dict(),
+                    'RESULT': RESULT,
                 },checkpoint_save_path
             )
