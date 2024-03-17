@@ -93,7 +93,7 @@ class test_dataset(Dataset):
 
     def __getitem__(self, index):
         image = self.rgb_loader(self.images[index])
-        image = self.transform(image)
+        image = self.img_transform(image)
         gt = self.gt_transform(self.binary_loader(self.gts[index]))
         name = self.images[index].split('/')[(- 1)]
         if name.endswith('.jpg'):
