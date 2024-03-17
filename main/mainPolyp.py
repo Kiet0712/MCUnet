@@ -126,7 +126,7 @@ def train(cfg,device):
                     )
                     print(f'NEW BEST {cfg.DATASET.TEST_DATASET[i]}!')
                     avg += result.item()
-                avg /= 5
+                avg /= len(cfg.DATASET.TEST_DATASET)
                 RESULT['mean'].append(avg)
                 if avg == max(RESULT['mean']):
                     torch.save(
