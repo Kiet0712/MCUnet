@@ -88,7 +88,7 @@ class test_dataset(Dataset):
             jt.transform.ToTensor(),
             jt.transform.ImageNormalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         self.gt_transform = jt.transform.Compose([
-            jt.transform.Resize((self.trainsize, self.trainsize)),
+            jt.transform.Resize((self.testsize, self.testsize)),
             jt.transform.ToTensor()])
         self.size = len(self.images)
 
