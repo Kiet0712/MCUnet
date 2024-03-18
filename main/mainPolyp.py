@@ -40,8 +40,10 @@ def validation(cfg,model,val_dataloader,device):
             img,mask = data
             inputs = img.to(device)
             label = mask.to(device)
-            
-            output = model(inputs)['segment_volume']
+            if cfg.MODEL.MULTIHEAD_OUTPUT:
+                output = model(inputs)['segment_volume']
+            else:
+                output = model(inputs)
 
             predict.append(output)
             answer.append(label)

@@ -9,7 +9,7 @@ from yacs.config import CfgNode as CN
 _C = CN()
 _C.MODEL = CN()
 _C.MODEL.CRFBNET = False
-_C.MODEL.CRFBNET_DEPTH = 4
+_C.MODEL.CRFBNET_DEPTH = 2
 _C.MODEL.MULTIHEAD_OUTPUT = False
 _C.MODEL.SELF_GUIDE_OUTPUT = False
 _C.MODEL.NORM = 'IN3d' # ('IN' or 'BN') + ('2d' or '3d')
