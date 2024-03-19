@@ -3,8 +3,10 @@ import numpy as np
 from PIL import Image
 
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as TF
 from torch.utils.data import Dataset
-
+import random
+import torch
 class PolypDataset(Dataset):
     def __init__(self, image_root, gt_root, trainsize):
         super().__init__()
@@ -18,8 +20,7 @@ class PolypDataset(Dataset):
         self.size = len(self.images)
         self.img_transform = transforms.Compose([
             transforms.Resize((self.trainsize, self.trainsize)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+            transforms.ToTensor()])
         self.gt_transform = transforms.Compose([
             transforms.Resize((self.trainsize, self.trainsize)),
             transforms.ToTensor()])
@@ -28,7 +29,17 @@ class PolypDataset(Dataset):
         image = self.rgb_loader(self.images[index])
         gt = self.binary_loader(self.gts[index])
         image = self.img_transform(image)
+        image = TF.adjust_brightness(image,random.uniform(-0.1,0.1))
+        image = TF.adjust_contrast(image,random.uniform(0.9,1.1))
+        image = TF.adjust_saturation(image,random.uniform(0.9,1.1))
+        image = TF.adjust_hue(image,random.uniform(-0.02,0.02))
         gt = self.gt_transform(gt)
+        if random.uniform(0,1)>0.5:
+            image = TF.hflip(image)
+            gt = TF.hflip(gt)
+        if random.uniform(0,1)>0.5:
+            image = TF.vflip(image)
+            gt = TF.vflip(gt)
         return (image, gt)
 
     def filter_files(self):
@@ -84,8 +95,7 @@ class test_dataset(Dataset):
         self.gts = sorted(self.gts)
         self.img_transform = transforms.Compose([
             transforms.Resize((self.testsize, self.testsize)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+            transforms.ToTensor()])
         self.gt_transform = transforms.Compose([
             transforms.Resize((self.testsize, self.testsize)),
             transforms.ToTensor()])
