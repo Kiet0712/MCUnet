@@ -29,7 +29,7 @@ class PolypDataset(Dataset):
         image = self.rgb_loader(self.images[index])
         gt = self.binary_loader(self.gts[index])
         image = self.img_transform(image)
-        image = TF.adjust_brightness(image,random.uniform(-0.1,0.1))
+        image = TF.adjust_brightness(image,random.uniform(-0.1,0.1)+1)
         image = TF.adjust_contrast(image,random.uniform(0.9,1.1))
         image = TF.adjust_saturation(image,random.uniform(0.9,1.1))
         image = TF.adjust_hue(image,random.uniform(-0.02,0.02))
