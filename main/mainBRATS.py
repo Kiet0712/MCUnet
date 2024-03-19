@@ -131,9 +131,6 @@ def train(cfg,device):
                     'scheduler_state_dict':scheduler.state_dict()
                 },checkpoint_save_path
             )
-file = tarfile.open('/kaggle/input/brats-2021-task1/BraTS2021_Training_Data.tar')
-
-file.extractall('./brain_images')
-file.close()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train(cfg,device)
+if __name__ == '__main__':
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    train(cfg,device)
