@@ -146,7 +146,7 @@ class LesionDataset(Dataset):
 
 
 def get_loader(image_root, gt_root, trainsize):
-    dataset = PolypDataset(image_root, gt_root, trainsize)
+    dataset = LesionDataset(image_root, gt_root, trainsize)
     return dataset
 
 
