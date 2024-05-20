@@ -71,7 +71,7 @@ class MHLoss_SELF_GUIDE(nn.Module):
             loss[short_str+'bg_loss'] = F.l1_loss(background_mask,volume*(1-gt_volume[:,i:(i+1)]))
             loss[short_str+'fg_guide_loss'] = F.l1_loss(foreground_mask,reconstruct_volume*segment_volume[:,i:(i+1)])
             loss[short_str+'bg_guide_loss'] = F.l1_loss(background_mask,reconstruct_volume*(1-segment_volume[:,i:(i+1)]))
-            reconstruct_guide_loss+=F.l1_loss(reconstruct_volume,foreground_mask+data[str_class+'background'])
+            reconstruct_guide_loss+=F.l1_loss(reconstruct_volume,foreground_mask+background_mask)
 
         loss['recstr_guide_loss'] = reconstruct_guide_loss
         sum_loss = 0
