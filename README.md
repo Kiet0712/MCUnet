@@ -1,8 +1,3 @@
-# MSGUnet: Improve Brain Tumor Segmentation using Multi Head Self Guide Unet
-Official implementation of [MSGUnet: Improve Brain Tumor Segmentation using Multi Head Self Guide Unet]()
-# Introduction
-MSGUnet propose a novel approach for Brain Tumor Segmentation by ..............
-# Result
 # Install
  ``` pip install -r requirement.txt ```
 # Acknowledgement
